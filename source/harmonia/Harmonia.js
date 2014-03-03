@@ -93,11 +93,79 @@ enyo.kind({
 		if (project !== null) {
 			this.$.hermesFileTree.connectProject(project, next).showFileOpButtons();
 			this.project = project;
+			this.manageBuildIntefaceAction();			
 		} else {
 			this.$.hermesFileTree.hideFileOpButtons().clear();
 			setTimeout(next,0);
 		}
 	},
+
+	/**
+	 * Enable/Disable the build interfaces actions depending on wether or not the project use a provider implement a build interface.
+	 * @private
+	 */
+	manageBuildIntefaceAction: function() {
+
+		if(this.checkSelectedProjectProvidersType("build")) {
+			this.$.buildItem.show();
+			this.$.installItem.show();
+			this.$.runItem.show();
+			this.$.runDebugItem.show();
+			
+		} else {
+			this.$.buildItem.hide();
+			this.$.installItem.hide();
+			this.$.runItem.hide();
+			this.$.runDebugItem.hide();
+		}
+	},
+	
+	/**
+	 * Test if at least one of the selected project provider implement the "build" interface.
+	 * @private
+	 */
+	checkSelectedProjectProvidersType: function(inType) {
+		// Array of the providers instances of the selected project
+		var allProjectProviders = Ares.Workspace.projects.getSelectedProject().attributes.config.data.providers;
+		
+		var providers = {};
+		for (var p in allProjectProviders) {
+
+			// If the provider is enabled
+			// Then append this profider instance in the array {providers}
+			if(allProjectProviders[p].enabled) {
+				providers[p] = allProjectProviders[p];
+			}
+		}
+
+		// Array of the services instances that are loaded in Client Ares IDE.
+		var services = this.getServicesByType(inType);
+
+		// Tells if the project use at least one {inType} service
+		var implementInterface = false;		
+
+		// If at least one of the selected project provider implement the {inType} interface
+		// Then "implementInterface" is set to "true"
+		// Else "implementInterface" is set to "false"
+		for(var key in providers) {
+			for (var i = 0, servicesLength = services.length; i < servicesLength; i ++) {
+				if(key === services[i].id) {
+					implementInterface = true; break;
+				}
+			}
+		}		
+
+		return implementInterface;	
+	}, 
+
+	/**
+	 * @return {Array} List of all the services that implement the "build" interface.
+	 * @private
+	 */
+	getServicesByType: function(inType){
+		return ServiceRegistry.instance.getServicesByType(inType);
+	},
+
 	showGrabber:function(){
 		this.$.filePanelGrabber.show();
 	},
