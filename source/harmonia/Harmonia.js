@@ -150,7 +150,8 @@ enyo.kind({
 		for(var key in providers) {
 			for (var i = 0, servicesLength = services.length; i < servicesLength; i ++) {
 				if(key === services[i].id) {
-					implementInterface = true; break;
+					implementInterface = true;
+					break;
 				}
 			}
 		}		
