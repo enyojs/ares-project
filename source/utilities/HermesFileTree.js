@@ -1034,9 +1034,9 @@ enyo.kind({
 			}
 
 			if (name === "package.js") {
-				templatePath = prefix+"../templates/package.js";
+				templatePath = prefix+"templates/package.js";
 			} else {
-				templatePath = prefix+"../templates/template."+type;
+				templatePath = prefix+"templates/template."+type;
 			}
 			var options = {
 				url: templatePath,
