@@ -553,6 +553,58 @@ div.large-fixed { width: 80%; }
 	right: 0.2em;
 }
 
+.ares-preview-device {
+	background: white ;
+	display: inline-block;
+	border: solid 20px black;
+	.ares-rounded-corners(20px);
+	transition-property: width,height;
+	transition-duration: 0.5s;
+	transition-timing-function: ease;
+	.ares-transform-origin(0 0);
+}
+
+.ares-preview-body {
+	margin: 4px;
+	background-color: @ares-preview-background;
+}
+
+.ares-preview-tools-panel {
+	width: 150px;
+	margin: 4px;
+}
+
+.ares-preview-groupbox {
+	margin-top: 8px;
+	margin-bottom: 30px;
+}
+
+.ares-preview-groupbox>div:not([class="onyx-groupbox-header"]) {
+	line-height: 1.5;
+	padding: @ares-preview-padding;
+	word-wrap: break-word;
+}
+
+.ares-preview-buttons {
+	padding: @ares-preview-padding;
+	margin-bottom: 5px;
+}
+
+.ares-preview-tools-panel > button, 
+.ares-preview-groupbox > div >button {
+	width: 100%;
+}
+
+.zoom-slider div:nth-child(2) {
+	visibility: hidden;
+}
+.zoom-slider .onyx-slider{
+	margin: 8px;
+}
+.zoom-label{
+	margin-right: 5px;
+}
+
 @import "source/enyo-editor/EnyoEditor.less";
 @import "assets/css/Popup.less";
 @import "assets/harmonia/services/css/HermesFileTree.less";
