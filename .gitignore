@@ -8,8 +8,7 @@ $*
 .DS_Store
 ._*
 .project
-/_ide
-/_preview
+/_ares
 /ide.log
 /node_modules/.bin
 /node_modules/archiver
