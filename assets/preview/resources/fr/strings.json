@@ -19,5 +19,6 @@
 	// "width: {width} px": "largeur : {width} px",
 	// "width: 600 px": "largeur : 600 px",
 	// "Zoom": "Zoom",
-	// "{projectName} - Ares project preview": "{projectName} - Prévisualisation du projet Ares"
+	// "{projectName} - Ares2 project preview": "{projectName} - Prévisualisation du Projet Ares2",
+	// "{projectName} - Ares2 Project Preview (Debug)": "{projectName} - Prévisualisation du Projet Ares2 (Debug)"
 }

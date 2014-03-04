@@ -156,7 +156,7 @@ enyo.kind(
 			this.$.projectName.setContent(param.name);
 
 			//display project name in the window title according to the debug(/minify) mode or not
-			if (document.title === "Ares2 project preview") {
+			if (document.title === "Ares2 IDE") {
 				document.title = ilibPreview("{projectName} - Ares2 Project Preview", {projectName: this.$.projectName.getContent()});
 			} else {
 				document.title = ilibPreview("{projectName} - Ares2 Project Preview (Debug)", {projectName: this.$.projectName.getContent()});
