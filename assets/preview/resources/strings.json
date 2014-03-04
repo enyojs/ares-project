@@ -20,5 +20,6 @@
 	"width: 600 px": "width: 600 px",
 	"Zoom": "Zoom",
 	"{projectName} - Ares2 Project Preview": "{projectName} - Ares2 Project Preview",
-	"{projectName} - Ares2 Project Preview (Debug)": "{projectName} - Ares2 Project Preview (Debug)"
+	"{projectName} - Ares2 Project Preview (Debug)": "{projectName} - Ares2 Project Preview (Debug)",
+	"{projectName} - Ares2 Project Preview (Test)": "{projectName} - Ares2 Project Preview (Test)"
 }

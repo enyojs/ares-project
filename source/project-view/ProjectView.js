@@ -263,10 +263,10 @@ enyo.kind({
 		var projectUrl = project.getProjectUrl() + '/' + topFile ;
 
 		var winLoc = window.location.toString()
-			    .replace(/\/ide\/$/,'/preview/preview.html') // Ares std
-			    .replace('/ide/index.html','/preview/preview.html') // Ares minified
-			    .replace('/ide/debug.html','/ide/preview.html') // Ares debug (every files)
-			    .replace('/ide/test.html','/ide/preview.html'); // Ares-under-test
+			    .replace(/\/ide\/$/,'/preview/index.html') // Ares std
+			    .replace('/ide/index.html','/preview/index.html') // Ares minified
+			    .replace('/ide/debug.html','/preview/debug.html') // Ares debug (every files)
+			    .replace('/ide/test.html','/preview/test.html'); // Ares-under-test
 		var previewUrl = winLoc
 				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
 				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;

@@ -155,12 +155,15 @@ enyo.kind(
 			this.$.scrolledIframe.setUrl(param.url) ;
 			this.$.projectName.setContent(param.name);
 
-			//display project name in the window title according to the debug(/minify) mode or not
-			if (document.title === "Ares2 IDE") {
-				document.title = ilibPreview("{projectName} - Ares2 Project Preview", {projectName: this.$.projectName.getContent()});
-			} else {
+			//display project name in the window title according to the debug/test/minify mode
+			var title = document.title.split(" ");			
+			if (title[title.length] === "(Debug)") {
 				document.title = ilibPreview("{projectName} - Ares2 Project Preview (Debug)", {projectName: this.$.projectName.getContent()});
-			} 
+			} else if (title[title.length] === "(Test)") {
+				document.title = ilibPreview("{projectName} - Ares2 Project Preview (Test)", {projectName: this.$.projectName.getContent()});
+			} else {
+				document.title = ilibPreview("{projectName} - Ares2 Project Preview", {projectName: this.$.projectName.getContent()});
+			}
 
 			// i18n checking
 			this.trace("ilibPreview: Screen=", ilibPreview("Screen"));
