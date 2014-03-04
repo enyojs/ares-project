@@ -6,5 +6,6 @@ enyo.depends(
 	"$lib/extra/analyzer2",
 	"$lib/foss",
 	"Ares.less",
+	"Preview.less",
 	"source"
 );
