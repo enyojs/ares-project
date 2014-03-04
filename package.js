@@ -5,6 +5,6 @@ enyo.depends(
 	"$lib/onyx/source/wip-package.js",
 	"$lib/extra/analyzer2",
 	"$lib/foss",
-	"Ares.less"
+	"Ares.less",
 	"source"
 );
