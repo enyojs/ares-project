@@ -2,58 +2,60 @@
 
 enyo.kind({
 	name: "Ares.Hera",
-	kind: "Control",
+	kind: "enyo.Control",
 	published: {
-		red: '00',
-		blue: '00',
-		green: '00',
-		color: "000000",
-		x: "0",
-		y: "0",
-		z: "0",
-		misc: "",
-		toggle: "",
 		file_source_dir: ""
 	},
 	events: {
 		onRegisterMe: "",
 		onNewcss: "",			// insert at end of file
 		onReplacecss: "",		// replace it in ace
-		onEditcss: ""			// call to reload the css editor and data
+		onEditcss: "",			// call to reload the css editor and data
 	},	
 	handlers: {
 		onPickdeclaration: "radioActivated",
 		onValueUpdate: "change",
 		onUnitChange: "unitchange",
+		onUrlout: "fixurl"		
 	},
 	components: [
-		{kind: "enyo.FittableColumns", style: "width: 33%; height: 100%;", components:[
+		
+		{kind: "enyo.FittableColumns", style: " height: 100%;", components:[
 			
-			{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},	// left
+			{ kind: "FittableRows", style: "width: 33%; height: 100%;", components: [
+				{name: "cssleft", kind: "Ares.Hera.Leftpannel", style: "width: 100%; height: 100%; ",	classes:"ares_deimos_left"},
+			]},	// left
 			
-			{name: "center", kind: "enyo.FittableRows", style: "width: 100%; height: 100%; ", components: [
+			{name: "center", kind: "enyo.FittableRows", style: "width: 33%; height: 100%; ", components: [
 				
-				{name:"sampleBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
+				{name:"sampleBox", kind: "enyo.FittableColumns",	style: "width: 33%; height: 60%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
 					{name: "Sample", allowHtml: true, style: "height: 60%; font-size: 10px;", components: [
 						{name: "sampletext", content: "Sample Text"},
 					]}
 				]},					
 				
 				{name:"outputBox", kind: "enyo.FittableColumns",	style: "width: 100%; height: 40%; ", classes: "hera_builder_font", allowHtml: true, Xstyle: "padding: 10px;", components: [
-					{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
+					{kind: "Scroller", classes: "enyo-fit", components: [
+						{name: "bg", allowHtml: true, style: "font-size: 13px;", content: ""},
+					]},
 				]},	
-			]},// center
+			]},	// center
 			
-			{kind: "FittableRows", style: "width: 100%; height: 100%;", components: [
-				{kind: "enyo.FittableColumns",  style: "width: 100%; height: 60%;", classes: "enyo-unselectable", components: [
-					{name: "list", kind: "List", count: 100, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
+			{kind: "FittableRows", style: "width: 33%; height: 100%;", components: [
+				{kind: "enyo.FittableColumns",  style: "width: 100%; height: 53%;", classes: "enyo-unselectable", components: [
+					{name: "list", kind: "List", count: 0, multiSelect: false, classes: "list-sample-list", onSetupItem: "setupItem", components: [
 						{name: "item", style: "width: 100%;", classes: "list-sample-item enyo-border-box", ontap: "classGrabber", components: [
 							{name: "name2", style: "width: 100%;"}
 						]},				
 					]},
 				]},
-
-				{kind: "enyo.FittableColumns", style: "width: 100%; height: 40%;", fit: true, classes: "enyo-unselectable", components: [
+				
+				{kind: "enyo.FittableColumns", style: "width: 90%; height: 5%;", classes: "hera_buttonbox", components:[
+					{kind:"onyx.Button", classes: "hera_newrule_button", content: "Delete rule", ontap:"deleteRule"},
+					{kind:"onyx.Button", classes:"hera_newrule_button", content: "New Css rule", ontap:"newRule"},
+				]},	// buttons
+				
+				{kind: "enyo.FittableColumns", style: "width: 100%;", fit: true, classes: "enyo-unselectable", components: [
 					{name: "valueinput", kind: "Ares.Hera.ValueInput", onUpdate: "change"},
 					
 				]}
@@ -72,7 +74,7 @@ enyo.kind({
 	declaration: [],
 	properties: [],			
 	value: [],
-	
+
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);	
@@ -89,6 +91,7 @@ enyo.kind({
 		this.trace("data", data);
 		this.filesourcedir = data.originator.docData.attributes.file.path;
 		var d = data.originator.$.aceWrapper.value;
+		this.reset();
 		this.dePuzzle(d);
 	},
 	
@@ -98,15 +101,13 @@ enyo.kind({
 	*/
 	csssave: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+	
 		if(this.mode === "reset"){
 			return;
 		}
-		if(this.mode === "new"){
-			this.doNewcss();
-			this.reset();
-		}
 		if(this.mode === "editing"){
 			this.doReplacecss();
+			this.reset();
 		}
 		return true;
 	},
@@ -118,20 +119,20 @@ enyo.kind({
 	change: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-		this.newvalue = inEvent.originator.valueout;
 		
-		if(this.newvalue.indexOf("url") != -1){
-			this.fixurl(this.newvalue);
+		if(inEvent === undefined){
+			this.newvalue = this.valueout;
+		}else{
+			this.newvalue = inEvent.originator.valueout;
 		}
-		
-		
+
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
-			if(this.properties[a].indexOf(this.$.property) !== -1 ){
+			if(this.properties[a].indexOf(this.property) !== -1 ){
 				break;	
 			}
 			a++;
 		}
-		this.properties[a] = "\t" + this.$.property;
+		this.properties[a] = "\t" + this.property;
 		this.value[a] = this.newvalue;
 		this.updateBox();
 	},
@@ -142,23 +143,34 @@ enyo.kind({
 	*/
 	updateBox: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+	
+		this.removeStyles();
 		var a = 0;
 		var tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
 		var outPut = this.className + " " + "{<br>" ;
 		var outString =  this.className + " " + "{\n" ;
-	
+			
+		if( this.className === ""){
+			return;
+		}
 		while(this.properties[a] !== undefined && this.properties[a] !== "null"){
 			if(this.properties[a] === "font-family"){
 				this.properties[a] =  "\t" + this.properties[a];
 			}
 			outPut = outPut + tab + this.properties[a] + ":" + this.value[a] + "<br>";
 			outString = outString + this.properties[a] + ":" + this.value[a] + "\n";
-			this.$.Sample.applyStyle(this.properties[a], this.value[a]);
-			this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
+			
+			if(this.value[a].indexOf("url") === -1){
+				this.$.Sample.applyStyle(this.properties[a], this.value[a]);
+				this.$.sampletext.applyStyle(this.properties[a], this.value[a]);
+			}else{
+				this.$.Sample.applyStyle(this.properties[a], this.proUrl );
+			}
 			a++;
 		}		
 		this.$.bg.setContent(outPut + "}");		// write in to the preview box
 		this.out = outString + "}\n";
+		this.mode = "editing";
 	},
 
 	/*
@@ -168,63 +180,40 @@ enyo.kind({
 	radioActivated: function(inSender, inEvent) {
 		this.trace("sender:", inSender, ", event:", inEvent);
 		var a = 0;
-		this.$.property = inEvent.name;
-	
-		if(inEvent.input === 'color'){
-			this.$.valueinput.showssliders();
+		
+		if( this.className === ""){
+			this.$.cssleft.selected();
+			return;
 		}
-			
-		if (inEvent.input === "misc"){
-			this.$.valueinput.showmisc();
-		}
-			
+		
+		this.property = inEvent.name;
+		
 		if (inEvent.input === "font"){
 			this.$.valueinput.showsblank();
-			this.$.property = "font-family";
+			this.property = "font-family";
 			
 			while(this.properties[a] !== undefined && this.properties[a] !== "null"){
-				if(this.properties[a].indexOf(this.$.property) !== -1 ){
+				if(this.properties[a].indexOf(this.property) !== -1 ){
 					break;	
 				}
 				a++;
 			}
-			this.properties[a] = this.$.property;
+			this.properties[a] = this.property;
 			this.value[a] = " " + inEvent.name +  ";";
 			this.updateBox();		
 		}
 		
-		if (inEvent.input === "xy"){
-			this.$.valueinput.showxy();
-		}
-		
-		if (inEvent.input === "xyz"){
-			this.$.valueinput.showxyz();
-		}
-		
-		if (inEvent.input === "picker"){
-			this.$.valueinput.showpicker();
-		}
-		
-		if (inEvent.input === "lrc"){
-			this.$.valueinput.showlrc();
-		}
-		
-		if (inEvent.input === "filepicker"){
-			this.$.valueinput.fileinput();
-		}
-			
-		if (inEvent.input === "bgc"){
-			this.$.valueinput.bgc();
-		}
-		
-		if (inEvent.input === "bgr"){
-			this.$.valueinput.bgr();
-		}
-		
-		if (inEvent.input === "bw"){
-			this.$.valueinput.bw();
-		}
+		this.$.valueinput.inputtype(inEvent.input);
+
 		this.updateBox();
+	},
+
+	/*
+	* the start of a new rule show the popup
+	*/
+	newRule: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.$.newCssPopup.show();
 	},
 
 	/*
@@ -233,10 +222,13 @@ enyo.kind({
 	*/
 	newDeclaration: function(inSender, inEvent){	
 		this.trace("sender:", inSender, ", event:", inEvent);
+		this.out = "";
 		this.className = this.$.input.hasNode().value;
 		this.$.newCssPopup.hide();
-		this.mode ="new";
-		this.updateBox();
+		this.out = this.className + " " + "{\n" + "}";
+		this.doNewcss();		// a quick save 
+		this.reset();
+		this.doEditcss();		// and a  reload
 		return;
 	},
 
@@ -252,25 +244,18 @@ enyo.kind({
 	
 	reset: function(){
 		this.$.valueinput.showsblank();
+		this.$.valueinput.clear();
+		this.$.cssleft.selected();
 		this.properties.length = 0;			
 		this.value.length = 0;	
 		this.old = null;
-		this.className = null;	
-		this.outPut = null;	
-			
-		this.$.bgImage = null;
-		this.x = null;
-		this.y = null;
-		this.z = null;	
-		
-		this.$.outPut = null;
-		this.$.property = null;	
-		this.mode = "rest";
-		this.$.outputBox.applyStyle("color", "#FFFFFF");
+		this.className = "";	
+		this.outPut = "";	
+		this.property = null;	
+		this.mode = "reset";
+		this.$.sampletext.applyStyle("color", "#FFFFFF; font-size: 10px;" );
 		this.$.outputBox.applyStyle("background-color", "#000000");
 		this.$.bg.setContent("");	
-		this.updateBox();
-
 	},
 
 	/*
@@ -287,14 +272,11 @@ enyo.kind({
 			if ("." === line[i].charAt(0) || "#" === line[i].charAt(0) ){
 				n = line[i].split("{");				
 				this.declaration[j] = n[0];
-	
 				j++;
-			//	k = 0;
 				n = "";
 			}
 		}
 		this.$.list.setCount(j);
-		this.addNewItem();
 		this.$.list.reset();
 	},
 
@@ -311,31 +293,26 @@ enyo.kind({
 		var n = [];
 		this.csssave();
 		this.reset();
+		this.doEditcss();
+		
 		n = (this.file.split("\n"));			// split the file up by lines
 
-		if ( this.declaration[c] === "New"){		// check to see if were making a new declartion	
-			this.mode = "new";
-			this.$.newCssPopup.show();
-			this.updateBox();
-		}else{
-			this.mode = "editing";
-			for (var i=0; i < n.length; i++) {
-				r = n[i].split("{");
-				if(this.declaration[c] === r[0]){
-					this.className = this.declaration[c];
-					for(var j = i+1;  j < n.length; j++){
-					
-						s = n[j].split(":");
-						if(s[0].indexOf("}") === 0){
-							break;
-						}
-						this.properties[a] = s[0];
-						this.value[a] = s[1];						
-						a++;
+		this.mode = "editing";
+		for (var i=0; i < n.length; i++) {
+			r = n[i].split("{");
+			if(this.declaration[c] === r[0]){
+				this.className = this.declaration[c];
+				for(var j = i+1;  j < n.length; j++){
+					s = n[j].split(":");
+					if(s[0].indexOf("}") === 0){
+						break;
 					}
-					this.oldcss(this.className);
-					this.updateBox();
+					this.properties[a] = s[0];
+					this.value[a] = s[1];						
+					a++;
 				}
+				this.oldcss(this.className);
+				this.updateBox();
 			}
 		}
 	},
@@ -362,7 +339,6 @@ enyo.kind({
 				}
 			}
 		}
-		
 		return;
 	},
 
@@ -378,48 +354,78 @@ enyo.kind({
 		return true;
 	},
 	
-	/*
-	* add  the "New declarations" to the list
-	*/
-	addNewItem: function( inSender, inEvent ) {
+   /*
+   * fix the in coming url to package 
+   */
+	fixurl: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
-        var index = this.$.list.getCount();
-        this.$.list.setCount( index+1 );
-        this.declaration[index] = "New";
-        this.$.list.reset();
-    },
-    
-	fixurl: function(address){
-		this.trace("address:", address);
-		var project = Ares.Workspace.projects.active;
-		var urlin = address.split("/");
+		var project = Ares.Workspace.projects.active;		
+		var id = inEvent.file.id;
+			
+		var urlin = inEvent.name.split("/");
 		var currentFileUrl = this.filesourcedir;
 		var a = currentFileUrl.split("/");
 		var add = "";
 		var b = "";
-	
+				
 		for (var i=1; i < a.length; i++) {		//  work our way back to the project root from the css file
 			if(a[i] === project){
 				i++;
 				for(i; i < a.length; i++){
 					add = add + ".";
 				}
-				add = add ;
+
 			}
 		}
 		
 		for (var j = 0; j < urlin.length; j++){		// work our way out from root to the image file
-			if(urlin[j] === "url("){
+			if(urlin[j] === project){
 				j++;
 				for(j;  j < urlin.length; j++){
 					b = b + "/" + urlin[j];
 				}
-			
 			}
 		}
-		var urlout = "	url(" + add + b;
-		this.newvalue = urlout;
-		return;
-    }
-
+		
+		var urlout = "	url(" + add + b + ");";
+		this.valueout = urlout;
+		this.proUrl = "	url(http://127.0.0.1:9009/res/services/home/id/" + id + ")";
+		this.change(this.valueout);
+    },
+    
+    /*
+    *	delete a css rule
+    */
+    deleteRule: function(inSender, inEvent){
+		this.trace("sender:", inSender, ", event:", inEvent);
+		this.out = "";
+		this.doReplacecss();	// replace it with nothing
+		this.doEditcss();		// and a  reload
+	},
+	
+	/*
+	*	this function is ti stip out old styles from the preview samples
+	*/
+	removeStyles: function(inSender, inEvent){
+		var a = 0;
+		var p = "";
+		var s = "";
+	
+		if(this.out !== undefined){
+			var	n = (this.out.split("\n"));
+		
+			for (var i=0; i < n.length; i++) {
+				for(var j = i+1;  j < n.length; j++){
+					s = n[j].split(":");
+					if(s[0].indexOf("}") === 0){
+						break;
+					}
+					p[a] = s[0];
+					this.$.Sample.addStyles(s[0], "null");
+					this.$.sampletext.applyStyle(s[0], "null");
+					a++;
+				}
+			}
+		}
+	}
 });

@@ -40,4 +40,8 @@ leftpannel.js
                   
    
                   
-                  
+newcss button
+			  \
+				newRule			show the popup
+						\
+					     newDeclaration    get the new classname  set this.out  save and reload 

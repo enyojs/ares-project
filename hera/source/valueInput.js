@@ -8,6 +8,7 @@ enyo.kind({
 		onValueUpdate: "",
 		onUnitChange: "",
 		onRegisterMe: "",
+		onUrlout: "",
 	},
 	handlers: {
 		onTotalx: "inputx",
@@ -249,60 +250,9 @@ enyo.kind({
 		this.$.panels.setIndex(this.blank);
 	},
 	
-	showssliders: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.sliders);
-	},
-	
-	showmisc: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.inputbox);
-	},
-	
-	showxy: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.xy);
-	},
-	
-	showxyz: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.xyz);
-	},
-	
-	showpicker: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.picker);
-	},
-	
-	showlrc: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.lrc);		
-	},
-	
-	fileinput: function(inSender, inData){
-		this.trace("sender:", inSender, ", event:", inData);
-		var project = Ares.Workspace.projects.getActiveProject();
-		this.$.selectFilePopup.reset();
-		this.$.selectFilePopup.connectProject(project, (function() {
-			this.$.selectFilePopup.setHeaderText("Select image");
-			this.$.selectFilePopup.connectProject(project);
-			this.$.selectFilePopup.show();
-		}).bind(this));
-		
-		this.clear();
-		this.$.panels.setIndex(this.filepicker);
-		this.$.selectFilePopup.reset();
-	},
-	
 	fileChosen: function(inSender, inEvent){
-		this.valueout = "url(" + inEvent.name + ");";
-		this.doValueUpdate();
+		this.event = inEvent;	
+		this.doUrlout(this.event);
 	},
 	
 	input_picker: function(inSender, inEvent){
@@ -394,25 +344,56 @@ enyo.kind({
 		this.valueout = undefined;
 	},
 	
-	bgc: function(inSender, inEvent){
+	inputtype: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
+		var project = Ares.Workspace.projects.getActiveProject();
 		this.clear();
-		this.$.panels.setIndex(this.bc);	
+		
+		if(inSender === "picker"){
+			this.$.panels.setIndex(this.picker);
+		}
+		
+		if(inSender === "color"){
+			this.$.panels.setIndex(this.sliders);
+		}
+		
+		if(inSender === "misc"){
+			this.$.panels.setIndex(this.inputbox);
+		}
+
+		if(inSender === "xy"){
+			this.$.panels.setIndex(this.xy);
+		}
+
+		if(inSender === "xyz"){
+			this.$.panels.setIndex(this.xyz);
+		}
+		
+		if(inSender === "lrc"){
+			this.$.panels.setIndex(this.lrc);
+		}
+		
+		if(inSender === "bgc"){
+			this.$.panels.setIndex(this.bc);
+		}
+		
+		if(inSender === "bgr"){
+			this.$.panels.setIndex(this.br);
+		}
+		
+		if( inSender === "borderwidth"){
+			this.$.panels.setIndex(this.borderwidth);
+		}
+		
+		if(inSender === "filepicker"){
+			this.$.selectFilePopup.connectProject(project, (function() {
+				this.$.selectFilePopup.setHeaderText("Select image");
+				this.$.selectFilePopup.show();
+			}).bind(this));
+			this.$.panels.setIndex(this.filepicker);
+			this.$.selectFilePopup.reset();	
+		}
 	},
-	
-	bgr: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.br);		
-	},
-	
-	bw: function(inSender, inEvent){
-		this.trace("sender:", inSender, ", event:", inEvent);
-		this.clear();
-		this.$.panels.setIndex(this.borderwidth);	
-	
-	}
-	
 });
 
 enyo.kind({

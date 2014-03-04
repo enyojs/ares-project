@@ -22,7 +22,7 @@ enyo.kind({
 					]}
 				]}
 			]}
-		]}
+		]}  
 	],
 
 	create: function() {
@@ -46,17 +46,14 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var dec = this.dec[index];
-		if (this.highlight === index){
-		
-			this.$.colorlist.addRemoveClass("list-sample-selected", this.selected);
-			
-			item.$.declaration.addRemoveClass("list-sample-selected", this.selected);	// dose just the text	
-			
-		//	item.addRemoveClass("list-sample-selected", this.selected);
-			
+	
+		if(item !== undefined){
+			item.$.declaration.setContent(dec.name);
+			if (this.highlight === index){
+				this.$.colorlist.addRemoveClass("list-sample-selected", this.selected);
+				item.$.declaration.addRemoveClass("list-sample-selected", this.selected);	// dose just the text	
+			}
 		}
-		item.$.declaration.setContent(dec.name);
-		
 		/* stop propagation */
 		return true;
 	},	
@@ -127,11 +124,15 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var fonts = this.fonts[index];
-		item.$.font.setContent(fonts.name);
-		item.$.font.setStyle("font-family:" + fonts.name + ";");
-		if (this.highlight === index){
-			item.$.font.addRemoveClass("list-sample-selected", this.selected);
-		}	
+
+		if(item !== undefined){
+			item.$.font.setContent(fonts.name);
+			item.$.font.setStyle("font-family:" + fonts.name + ";");
+		
+			if (this.highlight === index){
+				item.$.font.addRemoveClass("list-sample-selected", this.selected);
+			}
+		}
 		/* stop propagation */
 		return true;
 	},	
@@ -211,10 +212,13 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var border = this.borders[index];
-		if (this.highlight === index){
-			item.$.border.addRemoveClass("list-sample-selected", this.selected);
+		
+		if(item !== undefined){
+			if (this.highlight === index){
+				item.$.border.addRemoveClass("list-sample-selected", this.selected);
+			}
+			item.$.border.setContent(border.name);	
 		}
-		item.$.border.setContent(border.name);		
 		/* stop propagation */
 		return true;
 	},	
@@ -248,7 +252,7 @@ enyo.kind({
 		{name: "border-right-color", input:"color"},
 		{name: "border-left-color", input:"color"},
 		{name: "border-bottom-color", input:"color"},
-		{name: "border-width", input: "bw"},
+		{name: "border-width", input: "borderwidth"},
 		{name: "padding-top", input: "picker"},
 		{name: "padding-left", input: "picker"},
 		{name: "padding-right", input: "picker"},
@@ -304,9 +308,12 @@ enyo.kind({
 		var index = inEvent.index;
 		var item = inEvent.item;
 		var image = this.image[index];
-		item.$.image.setContent(image.name);
-		if (this.highlight === index){
-			item.$.image.addRemoveClass("list-sample-selected", this.selected);
+		
+		if(item !== undefined){
+			item.$.image.setContent(image.name);
+			if (this.highlight === index){
+				item.$.image.addRemoveClass("list-sample-selected", this.selected);
+			}
 		}
 		/* stop propagation */
 		return true;
@@ -355,7 +362,6 @@ enyo.kind({
 	components: [
 		{kind: "enyo.FittableRows", classes: "enyo-fit", components: [
 			{kind: "Scroller", fit: true, components: [
-				
 				{kind: "Ares.Hera.ColorItem"},
 				{kind: "Ares.Hera.FontsItem"},
 				{kind: "Ares.Hera.BorderItem"},
@@ -367,7 +373,6 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		ares.setupTraceLogger(this);
-		
 	},
 	
 	selected: function(inSender, inEvent){
