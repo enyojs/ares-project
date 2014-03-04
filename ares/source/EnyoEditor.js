@@ -1027,11 +1027,18 @@ enyo.kind({
 	* a reflow to fix deimos fro poking through here
 	*/
 	reflowed: function(inSender, inEvent){
-		this.trace(inSender, inEvent);	
+		this.trace(inSender, inEvent);
+	
 		var width = this.width * 3;
 		var index = this.$.panels.getIndex();
 		var styleis = "-webkit-transform: translateX(" + width + "px);";
-	
+		
+		if(index === 1 ){
+			width = 0;
+			styleis = "-webkit-transform: translateX(" + width + "px);";
+			this.$.deimos.setStyle(styleis);
+		}	
+		
 		if(index === 2 ){
 			this.$.deimos.setStyle(styleis);
 		}
