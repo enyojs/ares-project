@@ -27,3 +27,7 @@
   * made from [http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png](http://openclipart.org/image/800px/svg_to_png/38917/Print_Preview.png)
 * `folder_reload.png`
   * made of folder_new.png and  [http://openclipart.org/image/15px/svg_to_png/33685/view-refresh.png](http://openclipart.org/image/15px/svg_to_png/33685/view-refresh.png)
+* icon preview_reload.png:
+  * resized from `/usr/share/openclipart/png/computer/bb_reload_.png`
+  * provided by [openclipart](http://www.openclipart.org) project
+  * license: "creative commons Public Domain Dedication"
