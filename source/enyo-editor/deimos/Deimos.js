@@ -1,4 +1,7 @@
-/*global ProjectKindsModel, enyo, ares, setTimeout */
+/*global ProjectKindsModel, enyo, ares, AresI18n, setTimeout */
+
+/* ilibDeimos covers Deimos specific translations. */
+var ilibDeimos = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/enyo-editor/deimos/resources"));
 
 enyo.kind({
 	name: "Deimos",
@@ -14,22 +17,22 @@ enyo.kind({
 				{name: "palette", classes:"ares_deimos_left", kind: "Palette", ondragstart: "paletteDragStart"},
 				{name: "middle", classes: "ares-deimos-middle", fit: true, kind: "FittableRows", components: [
 					{name: "middleToolbar", kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
-						{kind: "onyx.Button", name: "reloadDesignerButton", /*classes: "deimos-designer-toolbar-spacing",*/ content: $L("Reload"), ontap: "reloadDesigner"},
+						{kind: "onyx.Button", name: "reloadDesignerButton", /*classes: "deimos-designer-toolbar-spacing",*/ content: ilibDeimos("Reload"), ontap: "reloadDesigner"},
 						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
-							{content: $L("Fit:")},
+							{content: ilibDeimos("Fit:")},
 							{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
-							{content: $L("Zoom:")},
+							{content: ilibDeimos("Zoom:")},
 							{kind: "onyx.PickerDecorator", components: [
 								{name: "zoomPickerButton"},
 								{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
 							]}
 						]},
 						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
-							{content: $L("Device:")},
+							{content: ilibDeimos("Device:")},
 							{kind: "Ares.PickerDecorator", /*classes: "deimos-designer-toolbar-spacing",*/ components: [
 								{classes: "deimos-device-picker"},
 								{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
-									{content: $L("Default"), value: { height: 800,  width: 600 }},
+									{content: ilibDeimos("Default"), value: { height: 800,  width: 600 }},
 									{content: "HP Slate7", value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
 									{content: "iPhone\u2122", value: { height: 480,  width: 320 }},
 									{content: "iPhone\u2122 4", value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
@@ -39,26 +42,26 @@ enyo.kind({
 									{content: "iPad\u2122 2", value: { width: 1024, height:  768, ppi: 132, dpr: 1 }},
 									{content: "iPad\u2122 mini", value: { width: 1024, height:  768, ppi: 163, dpr: 1 }},
 									{content: "HDTV", value: { height: 1080, width: 1920 }},
-									{content: $L("Custom")}
+									{content: ilibDeimos("Custom")}
 								]}
 							]},
 							{kind: "Ares.PickerDecorator", /*classes: "deimos-designer-toolbar-spacing",*/ components: [
 								{name: "screenPickerButton", classes: "deimos-screen-picker"},
 								{kind: "onyx.Picker", name: "screenPicker", ontap: "screenChosen", components: [
-									{content: $L("Portrait"), value: "portrait"},
-									{content: $L("Landscape"), value: "landscape"}
+									{content: ilibDeimos("Portrait"), value: "portrait"},
+									{content: ilibDeimos("Landscape"), value: "landscape"}
 								]}
 							]}
 						]},
 						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
-							{content: $L("Width (px):")},
+							{content: ilibDeimos("Width (px):")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "onyx.Input", name: "designerWidthInput", classes: "deimos-designer-input", placeholder: $L("Auto"), onchange: "updateWidth"}
+								{kind: "onyx.Input", name: "designerWidthInput", classes: "deimos-designer-input", placeholder: ilibDeimos("Auto"), onchange: "updateWidth"}
 							]},
 							{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
-							{content: $L("Height (px):")},
+							{content: ilibDeimos("Height (px):")},
 							{kind: "onyx.InputDecorator", components: [
-								{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: $L("Auto"), onchange: "updateHeight"}
+								{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: ilibDeimos("Auto"), onchange: "updateHeight"}
 							]}
 						]}						
 					]},
@@ -77,9 +80,9 @@ enyo.kind({
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
-						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
-						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
+						{name:"deleteButton", kind: "onyx.Button", content: ilibDeimos("Delete"), classes: "btn-danger",  ontap: "deleteAction"},
+						{name:"undoButton", kind: "onyx.Button", content: ilibDeimos("Undo"), classes: "btn-danger",  ontap: "undoAction"},
+						{name:"redoButton", kind: "onyx.Button", content: ilibDeimos("Redo"), classes: "btn-danger",  ontap: "redoAction"}
 					]},
 
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
@@ -124,6 +127,9 @@ enyo.kind({
 		this.trace("Creating Deimos");
 		this.inherited(arguments);
 		this.addHandlers();
+
+		// i18n checking
+		this.trace("ilibDeimos: Delete=", ilibDeimos("Delete"));
 	},
 	rendered: function() {
 		this.inherited(arguments);
@@ -139,7 +145,7 @@ enyo.kind({
 		this.deviceChosen();
 		var i, z;
 		for (i = 0; (z = this.zoomValues[i]); i++) {
-			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
+			this.$.zoomPicker.createComponent({content: ilibDeimos("{z}%", {z: z}), value: z, active: z === this.zoomValues[this.initZoomIndex]});
 		}
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
