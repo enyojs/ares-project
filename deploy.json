@@ -4,7 +4,6 @@
 	"assets": [
 		"./index.html", 
 		"./assets",
-		"./preview.html",
 		"./lib/foss/ace-builds/src-min", 
 		"./lib/foss/state-machine-2.2.0.min.js"
 	],

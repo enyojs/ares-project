@@ -14,7 +14,13 @@
 	</head>
 	<body class="enyo-unselectable">
 		<script type="text/javascript">
-			new Ares().write();
+			var loc = window.location.pathname.split("/");
+
+			if (loc[1] === "ide") {
+				new Ares().renderInto(document.body);
+			} else {
+				new Preview().renderInto(document.body);
+			}
 		</script>
 	</body>
 </html>

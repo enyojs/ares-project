@@ -202,5 +202,38 @@ enyo.kind({
 	
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
+			// Check if PhoneGap Build plugin is enabled that at least one target has been selected
+			if (serviceType === "build" && action === "build") {
+				var abortMsg = "";
+				if (project) {
+					var config = project.getConfig();
+					if (config && config.data && config.data.providers) {
+						var phonegap = config.data.providers.phonegap;
+						if (phonegap !== undefined) {
+							if (phonegap.enabled) {
+								var targets = phonegap.targets;
+								if (targets !== undefined && Object.keys(targets).length === 0) {
+									abortMsg = "No targets selected, build aborted";
+								}
+							} else {
+								abortMsg = "Phonegap build not enabled, build aborted";
+							}							
+						} else {
+							abortMsg = "No PhoneGap Build configuration, build aborted";
+						}				
+					} else {
+						abortMsg = "No project configuration available, build aborted";
+					}
+				} else {
+					abortMsg = "No project selected, build aborted";
+				}
+				
+				if (abortMsg !== "") {
+					this.doError({msg: abortMsg});
+					this.doHideWaitPopup();
+					return true;
+				}
+			}			
+
 	}
 });

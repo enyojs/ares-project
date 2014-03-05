@@ -712,7 +712,7 @@ app.configure(function(){
 	app.use(express.favicon(myDir + '/assets/images/ares_48x48.ico'));
 
 	["preview", "ide"].forEach(function(client) {
-		var dir = path.resolve(myDir, "_" + client);
+		var dir = path.resolve(myDir, "_ares");
 		if (argv['dev-mode'] || !fs.existsSync(dir)) {
 			dir = myDir;
 		}
