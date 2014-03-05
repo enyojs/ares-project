@@ -32,8 +32,7 @@ enyo.kind({
 				{
 					name: "projectView",
 					kind: "ProjectView",
-					classes: "ares-panel-min-width ",
-					onProjectSave: "saveProjectFiles"
+					classes: "ares-panel-min-width "
 				},
 				{
 					kind: "Harmonia",
@@ -47,7 +46,8 @@ enyo.kind({
 					onBuild: "buildAction",
 					onInstall: "installAction",
 					onRun: "runAction",
-					onRunDebug: "runDebugAction"
+					onRunDebug: "runDebugAction",
+					onProjectSave: "saveProjectFiles"
 				},
 				{kind: "Ares.EnyoEditor", name: "enyoEditor"}
 			]
@@ -461,7 +461,7 @@ enyo.kind({
 	previewAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if ( project) {
-			ComponentsRegistry.getComponent("projectView").launchPreview(project);
+			ComponentsRegistry.getComponent("harmonia").launchPreview(project);
 		}
 		return true; // stop the bubble
 	},
@@ -475,7 +475,7 @@ enyo.kind({
 	buildAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'build', 'build');
+			ComponentsRegistry.getComponent("harmonia").projectSaveAndAction(project, 'build', 'build');
 		}
 		return true; // stop bubble-up
 	},	
@@ -489,7 +489,7 @@ enyo.kind({
 	installAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'install');
+			ComponentsRegistry.getComponent("harmonia").projectSaveAndAction(project, 'test', 'install');
 		}
 		return true; // stop bubble-up
 	},
@@ -503,7 +503,7 @@ enyo.kind({
 	runAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'run');
+			ComponentsRegistry.getComponent("harmonia").projectSaveAndAction(project, 'test', 'run');
 		}
 		return true; // stop bubble-up
 	},
@@ -517,7 +517,7 @@ enyo.kind({
 	runDebugAction: function(inSender, inEvent) {
 		var project = inEvent && inEvent.project;
 		if (project) {
-			ComponentsRegistry.getComponent("projectView").projectSaveAndAction(project, 'test', 'runDebug');
+			ComponentsRegistry.getComponent("harmonia").projectSaveAndAction(project, 'test', 'runDebug');
 		}
 		return true; // stop bubble-up
 	},
