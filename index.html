@@ -20,11 +20,21 @@
 	</head>
 	<body class="enyo-unselectable">
 		<script>
-			if (!window.Ares) {
-				alert('No minified Ares found, redirecting to debug.html.');
-				location = document.URL.replace(/\/(index.html)?($|\?)/,"/debug.html$2");
+			var loc = window.location.pathname.split("/");
+
+			if (loc[1] === "ide") {
+				if (!window.Ares) {
+					alert('No minified Ares found, redirecting to debug.html.');
+					location = document.URL.replace(/\/(index.html)?($|\?)/,"/debug.html$2");
+				}
+				new Ares().renderInto(document.body);
+			} else {
+				if (!window.Preview) {
+					alert('No minified Ares found, redirecting to debug.html.');
+					location = document.URL.replace(/\/(index.html)?($|\?)/,"/debug.html$2");
+				}
+				new Preview().renderInto(document.body);
 			}
-			new Ares().renderInto(document.body);
 		</script>
 	</body>
 </html>
