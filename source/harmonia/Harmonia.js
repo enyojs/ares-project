@@ -15,7 +15,9 @@ enyo.kind({
 		onRun: "",
 		onRunDebug: "",
 		onPreview: "",
-		onProjectSave: ""
+		onProjectSave: "",
+		onShowWaitPopup: "",
+		onError: ""
 	},
 	handlers: {
 		onDisableProjectMenu: "disableProjectMenu"

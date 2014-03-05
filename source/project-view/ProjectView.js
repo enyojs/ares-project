@@ -39,7 +39,6 @@ enyo.kind({
 	},
 	events: {
 		onHideWaitPopup: "",
-		onShowWaitPopup: "",
 		onError: "",
 		onProjectSelected: "",
 		onRegisterMe: ""
