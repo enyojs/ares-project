@@ -149,7 +149,6 @@ enyo.kind(
 
 			//display project name in the window title according to the debug/test/minify mode
 			var title = document.title.split(" ");
-			this.log(title, title[title.length - 1]);
 			if (title[title.length - 1] === "(Debug)") {
 				document.title = ilibAres("{projectName} - Ares2 Project Preview (Debug)", {projectName: this.$.projectName.getContent()});
 			} else if (title[title.length] === "(Test)") {
