@@ -17,6 +17,7 @@ enyo.kind({
 		onPreview: "",
 		onProjectSave: "",
 		onShowWaitPopup: "",
+		onHideWaitPopup: "",
 		onError: ""
 	},
 	handlers: {
