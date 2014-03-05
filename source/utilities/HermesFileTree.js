@@ -427,7 +427,7 @@ enyo.kind({
 				this.$.serverNode.file = this.$.service.getRootNode();
 				this.$.serverNode.file.isServer = true;
 				this.$.serverNode.setContent(this.$.serverNode.file.name);
-				this.$.serverNode.setService(inService);
+				this.$.serverNode.file.service = inService;
 				if (next) {
 					next();
 				}
@@ -477,6 +477,7 @@ enyo.kind({
 					//
 					serverNode.file = inValue;
 					serverNode.file.isServer = true;
+					serverNode.file.service = service;
 
 					serverNode.setContent(nodeName);
 					this.refreshFileTree( function() {
@@ -1034,9 +1035,9 @@ enyo.kind({
 			}
 
 			if (name === "package.js") {
-				templatePath = prefix+"../templates/package.js";
+				templatePath = prefix+"templates/package.js";
 			} else {
-				templatePath = prefix+"../templates/template."+type;
+				templatePath = prefix+"templates/template."+type;
 			}
 			var options = {
 				url: templatePath,
