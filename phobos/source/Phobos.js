@@ -277,6 +277,7 @@ enyo.kind({
 		var show = modes[mode]||modes['text'];
 		this.$.right.setIndex(show.rightIndex);
 		this.resizeHandler();
+		this.owner.$.editorControls.reflow();
 		return showSettings.aceWrapper ;
 	},
 	hideWaitPopup: function() {
