@@ -1,4 +1,4 @@
-/*global ServiceRegistry, ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, AresI18n */
+/*global ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, AresI18n */
 
 /* ilibProjectView covers Project-view specific translations. */
 var ilibProjectView = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/project-view/resources")); 
@@ -39,10 +39,8 @@ enyo.kind({
 	},
 	events: {
 		onHideWaitPopup: "",
-		onShowWaitPopup: "",
 		onError: "",
 		onProjectSelected: "",
-		onProjectSave: "",
 		onRegisterMe: ""
 	},
 	create: function() {
@@ -197,120 +195,9 @@ enyo.kind({
 
 			inProject.setValidPgbConf(pgbValidation);
 		}
-	},
-
-	
+	},	
 	
 	projectRemoved: function(inSender, inEvent) {
 		ComponentsRegistry.getComponent("harmonia").setProject(null, ares.noNext);
-	},
-	/**
-	 * Request to save project and perform action
-	 * @param {Ares.Model.Project} project
-	 * @param {String} serviceType
-	 * @param {String} action
-	 */
-	projectSaveAndAction: function(project, serviceType, action) {
-		var cb = function (err) {
-			if (err) {
-				this.trace(err);
-			} else {
-				this.projectAction( project, serviceType, action);
-			}
-		};
-		if (project) {
-			this.doProjectSave({ project: project, callback: cb.bind(this) });
-		}
-	},
-	/**
-	 * @private
-	 */
-	projectAction: function(project, serviceType, action) {
-		var self = this;
-		this.doShowWaitPopup({msg: "Starting: " + action, service: serviceType});
-		// TODO: Must be reworked to allow the selection of builder/tester in the UI - ENYO-2049
-		var services = ServiceRegistry.instance.getServicesByType(serviceType);
-		var provider =	services[services.length - 1];
-		if (!provider) {
-			this.doError({msg: 'No ' + serviceType + ' service available'});
-		} else if (typeof provider[action] !== 'function') {
-			this.doError({msg: 'Service ' + provider.name + ' does not provide action: ' + action});
-		} else {
-			// Check if PhoneGap Build plugin is enabled that at least one target has been selected
-			if (serviceType === "build" && action === "build") {
-				var abortMsg = "";
-				if (project) {
-					var config = project.getConfig();
-					if (config && config.data && config.data.providers) {
-						var phonegap = config.data.providers.phonegap;
-						if (phonegap !== undefined) {
-							if (phonegap.enabled) {
-								var targets = phonegap.targets;
-								if (targets !== undefined && Object.keys(targets).length === 0) {
-									abortMsg = "No targets selected, build aborted";
-								}
-							} else {
-								abortMsg = "Phonegap build not enabled, build aborted";
-							}							
-						} else {
-							abortMsg = "No PhoneGap Build configuration, build aborted";
-						}				
-					} else {
-						abortMsg = "No project configuration available, build aborted";
-					}
-				} else {
-					abortMsg = "No project selected, build aborted";
-				}
-				
-				if (abortMsg !== "") {
-					this.doError({msg: abortMsg});
-					this.doHideWaitPopup();
-					return true;
-				}
-			}			
-
-			provider[action](project, function(inError) {
-				self.doHideWaitPopup();
-				self.refreshFileTree(project.getFolderId());
-				if (inError) {
-					self.doError({msg: inError.toString(), err: inError});
-				}
-			});
-		}
-	},
-
-	launchPreview: function (project) {
-		var cb = function (err) {
-			if (err) {
-				this.trace(err);
-			} else {
-				this._launchPreview(project);
-			}
-		};
-		this.doProjectSave({ project: project, callback: cb.bind(this) });
-	},
-
-	_launchPreview: function (project) {
-		var config = project.getConfig() ;
-		var topFile = config.data.preview.top_file ;
-		var projectUrl = project.getProjectUrl() + '/' + topFile ;
-
-		var winLoc = window.location.toString()
-			    .replace(/\/ide\/$/,'/preview/index.html') // Ares std
-			    .replace('/ide/index.html','/preview/index.html') // Ares minified
-			    .replace('/ide/debug.html','/preview/debug.html') // Ares debug (every files)
-			    .replace('/ide/test.html','/preview/test.html'); // Ares-under-test
-		var previewUrl = winLoc
-				+ ( winLoc.indexOf('?') != -1 ? '&' : '?' )
-				+ 'url=' + encodeURIComponent(projectUrl)+'&name=' + project.id;
-
-		this.trace("preview on URL ", previewUrl) ;
-
-		window.open(
-			previewUrl,
-			'_blank', // ensure that a new window is created each time preview is tapped
-			'scrollbars=0,menubar=1,resizable=1',
-			false
-		);
 	}
 });
