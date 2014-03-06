@@ -167,7 +167,7 @@ enyo.kind({
 	 * @private
 	 */
 	labelChanged: function() {
-		this.$.label.setContent(this.name);
+		this.$.label.setContent(this.label);
 	},
 
 	/**
