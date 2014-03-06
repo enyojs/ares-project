@@ -61,7 +61,7 @@ enyo.kind({
 						},
 						{
 							kind: "onyx.Tooltip",
-							content: "PhoneGap Build Help",
+							content: ilibPGB("PhoneGap Build Help"),
 							classes: "ares-tooltip-last-phoneGap"
 						}]
 					}]
