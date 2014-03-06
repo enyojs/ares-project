@@ -1,3 +1,8 @@
+/*global AresPBGI18n */
+
+/* ilibPGB covers PhoneGap Build specific translations */
+var ilibPGB = AresPBGI18n.resolve.bind(null, AresPBGI18n.setBundle(navigator.language, "$assets/harmonia/services/phonegap/resources"));
+
 /**
  * Hold the needed data to create the UI Projet -> Edit. Actually it's used in : 
  * "ProjectProperties.js", "PhonegapUIRows.js" & "Build.js".
@@ -29,32 +34,32 @@ enyo.kind({
 		commonDrawersContent: [
 			{
 				id: "buildOption",
-				name: "Build Options",
+				name: ilibPGB("Build Options"),
 				type: "Drawer",
 				rows: [
-					{name: "autoGenerateXML", label: "Generate config.xml file when building", content: "", defaultValue: "true", type: "BuildOption"},
-					{name: "minification", label:"Activate the build minification", content:"", defaultValue: "true", type: "BuildOption"}
+					{name: "autoGenerateXML", label: ilibPGB("Generate config.xml file when building"), content: "", defaultValue: "true", type: "BuildOption"},
+					{name: "minification", label: ilibPGB("Activate the build minification"), content:"", defaultValue: "true", type: "BuildOption"}
 				]
 			},
 			{
 				id: "applicationPermissions",
-				name: "Application permissions",
+				name: ilibPGB("Application permissions"),
 				type: "PanelInDrawer",
 				rows: [
-					{name: "battery", label: "Battery",	content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "camera", label: "Camera", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "contact", label: "Contact",	content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "file", label: "File", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "media",	label: "Media", content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "geolocation", label: "Geolocation", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "network", label: "Network", content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
-					{name: "notification", label: "Notification", content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
-					{name: "device", label: "Device", content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}		
+					{name: "battery", label: ilibPGB("Battery"), content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "camera", label: ilibPGB("Camera"), content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "contact", label: ilibPGB("Contact"), content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "file", label: ilibPGB("File"), content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "media",	label: ilibPGB("Media"), content: "",defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "geolocation", label: ilibPGB("Geolocation"), content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "network", label: ilibPGB("Network"), content: "",defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"},
+					{name: "notification", label: ilibPGB("Notification"), content: "", defaultValue: "", type: "CheckBoxRow", jsonSection: "features"},
+					{name: "device", label: ilibPGB("Device"), content: "", defaultValue: "",  type: "CheckBoxRow", jsonSection: "features"}		
 				]
 			},
 			{
 				id: "sharedConfiguration",
-				name: "Shared configuration",
+				name: ilibPGB("Shared configuration"),
 				type: "Drawer",
 				rows: [
 					{
@@ -65,12 +70,12 @@ enyo.kind({
 						type: "PickerRow", 
 						jsonSection: "preferences"
 					},
-					{name: "orientation", label:"Orientation",content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow", jsonSection: "preferences"},
-					{name: "target-device",	label: "Target device", content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
-					{name: "fullscreen", label: "Fullscreen mode", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},					
-					{name: "access", label: "Access origin", content: "", defaultValue: "http://127.0.0.1", type: "AccessRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "SplashScreen", content: "", defaultValue: "", defaultWidth: "60", defaultHeight: "60", type: "ImgRow", description: "(px)"}
+					{name: "orientation", label: ilibPGB("Orientation"), content:["both", "landscape", "portrait"], defaultValue: "both", type: "PickerRow", jsonSection: "preferences"},
+					{name: "target-device",	label: ilibPGB("Target device"), content: ["universal", "handset", "tablet"], defaultValue: "universal", type: "PickerRow", jsonSection: "preferences"},
+					{name: "fullscreen", label: ilibPGB("Fullscreen mode"), content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},					
+					{name: "access", label: ilibPGB("Access origin"), content: "", defaultValue: "http://127.0.0.1", type: "AccessRow", jsonSection: "preferences"},
+					{name: "icon", label: ilibPGB("Icon"), content: "icon.png", defaultValue: "/icon.png", defaultWidth: "32", defaultHeight: "32", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", defaultWidth: "60", defaultHeight: "60", type: "ImgRow", description: "(px)"}
 				]		
 			}
 		],
@@ -78,65 +83,65 @@ enyo.kind({
 		platformDrawersContent: [
 			{
 				id: "android",
-				name: "Google Android",
+				name: ilibPGB("Google Android"),
 				type: "Target",
 				rows: [
-					{name: "android-installLocation", label: "Install Location", content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
-					{name: "android-minSdkVersion", label: "Min. API Level/Android Version ", content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
-					{name: "android-targetSdkVersion", label: "Target API Level/Android Version ", content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
-					{name: "android-maxSdkVersion", label: "Max. API Level/Android Version ", content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
-					{name: "android-windowSoftInputMode", label: "Window SoftInput Mode ", content: ["stateVisible", "adjustResize"], defaultValue: "stateVisible", type: "PickerRow", jsonSection: "preferences"},
-					{name: "splash-screen-duration", label: "Splash screen Duration (ms)", content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
-					{name: "load-url-timeout", label: "Load URL timeout (ms)", content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", type: "AndroidImgRow"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
+					{name: "android-installLocation", label: ilibPGB("Install Location"), content: ["internalOnly", "preferExternal", "auto"], defaultValue: "internalOnly", type: "PickerRow", jsonSection: "preferences"},
+					{name: "android-minSdkVersion", label: ilibPGB("Min. API Level/Android Version "), content: [], defaultValue: "7", type: "SDKVersionRow", jsonSection: "preferences"},
+					{name: "android-targetSdkVersion", label: ilibPGB("Target API Level/Android Version "), content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
+					{name: "android-maxSdkVersion", label: ilibPGB("Max. API Level/Android Version "), content: [], defaultValue: "None", type: "SDKVersionRow", jsonSection: "preferences", none: ""},
+					{name: "android-windowSoftInputMode", label: ilibPGB("Window SoftInput Mode "), content: ["stateVisible", "adjustResize"], defaultValue: "stateVisible", type: "PickerRow", jsonSection: "preferences"},
+					{name: "splash-screen-duration", label: ilibPGB("Splash screen Duration (ms)"), content: "5000", defaultValue: "5000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
+					{name: "load-url-timeout", label: ilibPGB("Load URL timeout (ms)"), content: "20000", defaultValue: "20000", type: "NumberInputRow", jsonSection: "preferences", description: "Time in milliseconds"},
+					{name: "icon", label: ilibPGB("Icon"), content: "", defaultValue: "/icon.png", type: "AndroidImgRow"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", type: "AndroidImgRow"},
+					{name: "signingKey", label: ilibPGB("Signing Key"), content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]				
 			}, 
 			{
 				id: "ios",
-				name: "Apple iOS",
+				name: ilibPGB("Apple iOS"),
 				type: "Target",
 				rows: [
-					{name: "webviewbounce", label: "Web view bounce", content:  ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "prerendered-icon", label: "Prerendred icon", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "ios-statusbarstyle", label: "Status Bar style", content: ["black-opaque", "black-translucent", "default"], defaultValue: "black-opaque",  type: "PickerRow", jsonSection: "preferences"},
-					{name: "detect-data-types", label: "Detect Data type", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "exit-on-suspend", label: "Exit on suspend", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "show-splash-screen-spinner", label: "Show splash screen spinner", content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "auto-hide-splash-screen", label: "Auto-hide splash screen", content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
+					{name: "webviewbounce", label: ilibPGB("Web view bounce"), content:  ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "prerendered-icon", label: ilibPGB("Prerendred icon"), content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "ios-statusbarstyle", label: ilibPGB("Status Bar style"), content: ["black-opaque", "black-translucent", "default"], defaultValue: "black-opaque",  type: "PickerRow", jsonSection: "preferences"},
+					{name: "detect-data-types", label: ilibPGB("Detect Data type"), content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "exit-on-suspend", label: ilibPGB("Exit on suspend"), content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "show-splash-screen-spinner", label: ilibPGB("Show splash screen spinner"), content: ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "auto-hide-splash-screen", label: ilibPGB("Auto-hide splash screen"), content: ["true", "false"], defaultValue: "true", type: "PickerRow", jsonSection: "preferences"},
+					{name: "icon", label: ilibPGB("Icon"), content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
+					{name: "signingKey", label: ilibPGB("Signing Key"), content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
 			},
 			{
 				id: "winphone",
-				name: "Microsoft Windows Phone 7",
+				name: ilibPGB("Microsoft Windows Phone 7"),
 				type: "Target",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
+					{name: "icon", label: ilibPGB("Icon"), content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
 				]				
 			},  
 			{
 				id: "blackberry",
-				name: "RIM Blackberry",
+				name: ilibPGB("RIM Blackberry"),
 				type: "Target",
 				rows: [
-					{name: "disable-cursor", label: "Disable Cursor", content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
-					{name: "signingKey", label: "Signing Key", content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
+					{name: "disable-cursor", label: ilibPGB("Disable Cursor"), content:  ["true", "false"], defaultValue: "false", type: "PickerRow", jsonSection: "preferences"},
+					{name: "icon", label: ilibPGB("Icon"), content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"},
+					{name: "signingKey", label: ilibPGB("Signing Key"), content: "", defaultValue: "", type: "KeySelector", jsonSection: "targets"}
 				]
 			}, 
 			{
 				id: "webos",
-				name: "HP webOS 2",
+				name: ilibPGB("HP webOS 2"),
 				type: "Target",
 				rows: [
-					{name: "icon", label: "Icon", content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
-					{name: "splashScreen", label: "Splash screen", content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
+					{name: "icon", label: ilibPGB("Icon"), content: "", defaultValue: "/icon.png", defaultWidth:"", defaultHeight:"", type: "ImgRow", description: "(px)"},
+					{name: "splashScreen", label: ilibPGB("Splash screen"), content: "", defaultValue: "", defaultWidth: "", defaultHeight: "", type: "ImgRow", description: "(px)"}
 				]
 			}
 			
