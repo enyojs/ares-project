@@ -648,8 +648,8 @@ enyo.kind({
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
 	
-		if(this.$.panels.getIndex() === 2){		// save and close hera if user switches tabs away from hera
-			this.closecssDesigner();
+		if(this.$.panels.getIndex() === 2){		// save  hera if user switches tabs away from hera
+			this.$.hera.csssave();
 			this.reflowed();
 		}
 		this.switchToDocument(newDoc, $L("Switching files..."), inEvent.next);
@@ -783,6 +783,11 @@ enyo.kind({
 		if (currentIF === 'code') {
 			this.$.panels.setIndex(this.phobosViewIndex);
 			this.manageControls(false);
+		} else if(currentIF === 'hera') {
+			this.$.panels.setIndex(2);
+			this.$.editorControls.setShowing(false);
+			this.$.deimosControls.setShowing(false);
+			this.$.cssControls.setShowing(true);
 		} else {
 			phobos.designerAction();
 			this.manageControls(true);
@@ -1021,6 +1026,7 @@ enyo.kind({
 		this.trace(inSender, inEvent);
 		this.$.hera.cssload(inEvent);
 		this.$.panels.setIndex(2) ;
+		this.activeDocument.setCurrentIF('hera');
 	},
 	
 	/*
