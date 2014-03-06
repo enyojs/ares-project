@@ -1,4 +1,4 @@
-/*global ares, Phonegap, enyo */
+/*global ares, Phonegap, enyo, ilibPGB */
 
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -266,12 +266,12 @@ enyo.kind({
 		this.bubble("onHideMessageContainer");
 
 		if (status === "skip") {
-			this.$.statusMessage.setContent("Build skipped for this platform");
+			this.$.statusMessage.setContent(ilibPGB("Build skipped for this platform"));
 			return true;
 		}
 
 		if (status === "pending") {
-			this.$.statusMessage.setContent("Build in progress");
+			this.$.statusMessage.setContent(ilibPGB("Build in progress"));
 			return true;
 		}
 
@@ -280,7 +280,7 @@ enyo.kind({
 			return true;
 		}
 
-		this.$.statusMessage.setContent("Application not built yet");
+		this.$.statusMessage.setContent(ilibPGB("Application not built yet"));
 
 		return true;
 
@@ -387,7 +387,7 @@ enyo.kind({
 		 However we'll need to revise the backbone store for Phonegap build as we transform it into a plugin
 		 */
 
-		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? "Download complete" : inDownloadStatus === 0 ? "Download failed" : "Download in progress";
+		this.provider.getSelectedProject().getDownloadStatus()[inPlatform] = inDownloadStatus === 1 ? ilibPGB("Download complete") : inDownloadStatus === 0 ? ilibPGB("Download failed") : ilibPGB("Download in progress");
 
 		this.bubble("onUpdateStatusMessage");
 	},

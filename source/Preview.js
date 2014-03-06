@@ -1,4 +1,4 @@
-/*global enyo, ares, ilibAres, ilibUtilities */
+/*global enyo, ares, ilibAres */
 
 enyo.path.addPaths({
 	"assets"	: "$enyo/../assets"
@@ -156,10 +156,6 @@ enyo.kind(
 			} else {
 				document.title = ilibAres("{projectName} - Ares2 Project Preview", {projectName: this.$.projectName.getContent()});
 			}
-
-			// i18n checking
-			this.trace("ilibAres: Screen=", ilibAres("Screen"));
-			this.trace("ilibUtilities: Close=", ilibUtilities("Close"));
 		},
 
 		zoom: function(inSender, inEvent) {

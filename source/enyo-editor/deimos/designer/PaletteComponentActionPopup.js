@@ -1,3 +1,4 @@
+/*global enyo, ilibDeimos */
 enyo.kind({
 	name: "PaletteComponentActionPopup",
 	kind: "onyx.Popup",
@@ -6,10 +7,10 @@ enyo.kind({
 		targetComponent:""
 	},
 	components:[
-		{name:"title", content: "Select one action"},
-		{name:"body", kind: "FittableRows", noStretch:true, components: [
+		{name:"title", content: ilibDeimos("Select one action")},
+		{name:"body", kind: "FittableRows", noStretch: true, components: [
 			{name: "vtAction", kind: "ViewTemplateAction", showing:false },
-			{name: "close", kind: "onyx.Button", content: "Cancel", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}	
+			{name: "close", kind: "onyx.Button", content: ilibDeimos("Cancel"), centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}	
 		]}
 	],
 	events: {
@@ -32,9 +33,9 @@ enyo.kind({
 	kind: "FittableRows",
 	noStretch:true,
 	components: [
-		{name: "addtoKind", kind: "onyx.Button",  content: "Add to current kind", style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
-		{name: "replaceKind", kind: "onyx.Button", content: "Replace current kind", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
-		{name: "addNewKind", kind: "onyx.Button", content: "Add new kind to current file", centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}
+		{name: "addtoKind", kind: "onyx.Button",  content: ilibDeimos("Add to current kind"), style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
+		{name: "replaceKind", kind: "onyx.Button", content: ilibDeimos("Replace current kind"), centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"},
+		{name: "addNewKind", kind: "onyx.Button", content: ilibDeimos("Add new kind to current file"), centered: true, style:"width:200px;height:30px;", ontap: "doPaletteComponentAction"}
 	],
 	events: {
 		onPaletteComponentAction : ""

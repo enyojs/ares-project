@@ -3,6 +3,7 @@
 		"origins": [ "http://localhost:9009" ],
 		"methods": []
 	},
+	"language": "en",
 	"globalProxyUrl": null,
 	"headers": {},
 	"services": [

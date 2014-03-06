@@ -1,4 +1,4 @@
-/* global ares */
+/* global ares, ilibDeimos */
 enyo.kind({
 	name: "CategoryItem",
 	components: [
@@ -111,8 +111,8 @@ enyo.kind({
 	components: [
 		{kind: "FittableRows", classes: "enyo-fit", components: [
 			{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: "Expand all", ontap: "expandAllCategories"},
-				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: "Collapse all", ontap: "collapseAllCategories"}
+				{kind: "onyx.Button", name: "expandAllCategoriesButton", content: ilibDeimos("Expand all"), ontap: "expandAllCategories"},
+				{kind: "onyx.Button", name: "collapseAllCategoriesButton", content: ilibDeimos("Collapse all"), ontap: "collapseAllCategories"}
 			]},
 			{kind: "Scroller", fit: true, components: [
 				{name: "list", kind: "Repeater", count: 0, onSetupItem: "setupItem", components: [
@@ -120,7 +120,7 @@ enyo.kind({
 				]}
 			]},
 			{kind: "onyx.InputDecorator", style: "width:100%; margin-top:10px;", layoutKind: "FittableColumnsLayout", components: [
-				{kind: "onyx.Input", name: "filterPalette", fit:true, placeholder: "filter", oninput: "paletteFiltering"},
+				{kind: "onyx.Input", name: "filterPalette", fit:true, placeholder: ilibDeimos("filter"), oninput: "paletteFiltering"},
 				{kind: "onyx.Icon", name: "filterPaletteIcon", src: "$assets/enyo-editor/deimos/images/search-input-search.png", style: "height:20px;", ontap: "resetFilter"}
 			]}
 		]}
@@ -221,7 +221,7 @@ enyo.kind({
 		var catchAllCategories = {
 			"" : {
 				order: 11000,
-				name: "Custom Kinds",
+				name: ilibDeimos("Custom Kinds"),
 				items: []
 			}
 		};
@@ -263,7 +263,7 @@ enyo.kind({
 					// Generate a new custom palette for this package if it doesn't exist
 					cat = {
 						order: 10000,
-						name: pkg + " (other)",
+						name: ilibDeimos("{pkg} (other)", {pkg: pkg}),
 						items: []
 					};
 					catchAllCategories[pkg] = cat;

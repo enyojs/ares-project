@@ -1,7 +1,7 @@
 /*global ProjectConfig, ares, ComponentsRegistry, async, enyo, Phonegap, AresI18n */
 
 /* ilibProjectView covers Project-view specific translations. */
-var ilibProjectView = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/project-view/resources")); 
+var ilibProjectView = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/project-view/resources")); 
 
 /**
  * This kind is the top kind of project handling. It contains:

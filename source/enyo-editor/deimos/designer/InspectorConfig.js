@@ -1,4 +1,4 @@
-/*global enyo */
+/*global enyo, ilibDeimos */
 
 /**
  * This "abstract" kind defines the interface needed for the
@@ -396,7 +396,7 @@ enyo.kind({
 		inputTip: "",
 		activated: true,
 		status: false,
-		buttonTip: "Select file..."
+		buttonTip: ilibDeimos("Select file...")
 	},
 	events: {
 		onInputButtonTap: "",
@@ -449,7 +449,7 @@ enyo.kind({
 	},
 	/** @private */
 	pathInputTap: function (inSender, inEvent) {
-		this.doInputButtonTap({header: $L("Select file...")});
+		this.doInputButtonTap({header: ilibDeimos("Select file...")});
 		return true;
 	},
 	fieldValueChanged: function() {
