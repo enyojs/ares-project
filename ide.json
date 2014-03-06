@@ -30,12 +30,12 @@
 			"command":"@NODE@", "params":[
 				"@INSTALLDIR@/hermes/fsDropbox.js", "-P", "/files", "-p", "0"
 			],
-			"auth": {
+			"Xauth": {
 				"type": "dropbox",
 				"appKey": "",
 				"appSecret": ""
 			},
-			"proxy":{
+			"Xproxy":{
 				"http":{
 					"tunnel":"OverHttp",
 					"host":"web-proxy.corp.hp.com",
@@ -59,7 +59,7 @@
 				"@INSTALLDIR@/hermes/bdPhoneGap.js", "--level", "http", "-P", "/phonegap", "-p", "0", "-t", "240000"
 			],
 			"useJsonp":false,
-			"proxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"timeout": 240000,
 			"auth": {
 				"type": "phonegap"
@@ -76,7 +76,7 @@
 				"@INSTALLDIR@/hermes/genZip.js", "--level", "http", "-P", "/genzip", "-p", "0", "-t", "120000"
 			],
 			"timeout": 30000,
-			"proxyUrl": "http://web-proxy.corp.hp.com:8080",
+			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
 					"id": "bootplate-2.3.0-pre.12",
