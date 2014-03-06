@@ -1,7 +1,7 @@
 /*global AresPBGI18n */
 
 /* ilibPGB covers PhoneGap Build specific translations */
-var ilibPGB = AresPBGI18n.resolve.bind(null, AresPBGI18n.setBundle(navigator.language, "$assets/harmonia/services/phonegap/resources"));
+var ilibPGB = AresPBGI18n.resolve.bind(null, AresPBGI18n.setBundle("$assets/harmonia/services/phonegap/resources"));
 
 /**
  * Hold the needed data to create the UI Projet -> Edit. Actually it's used in : 

@@ -1,7 +1,7 @@
 /*global analyzer, ares, enyo, AresI18n, ProjectCtrl, setTimeout */
 
 /* ilibPhobos covers Phobos specific translations. */
-var ilibPhobos = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/enyo-editor/phobos/resources"));
+var ilibPhobos = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/enyo-editor/phobos/resources"));
 
 enyo.kind({
 	name: "Phobos",

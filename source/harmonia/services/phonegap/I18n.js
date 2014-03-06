@@ -1,7 +1,7 @@
 /*global ilib */
 /*
- * AresPBGI18n is the entry point used to define translation bundle based on ilib library (http://www.jedlsoft.com/jedlsoft/ilib/jsdoc/) 
- * through enyo-ilib library wrapper.
+ * AresPBGI18n is the entry point used to define the PhoneGap Build specific translation bundle based on ilib library 
+ * (http://www.jedlsoft.com/jedlsoft/ilib/jsdoc/) through enyo-ilib library wrapper.
  * Translation bundles must be defined in the main kinds related to the translation domain covered by the translation resopurces
  * Translation bundles must, then, be declared as global in each kind that will require translation from the related domains.
  * Translation bundles insure the translation of simple or parametrized entries.
@@ -14,6 +14,24 @@
  *    var parametrizedTranslation = translationBundle("Parametrized message with {param1} and {param2}", {param1: value1, param2: value2});
  */
 var AresPBGI18n = {};
+
+var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
+
+var req = new enyo.Ajax({
+	url: origin + '/res/language'
+});
+req.response(function(inSender, inData){
+	if (inData.language) {
+		enyo.log("PhoneGap Build service forced language:", inData.language);
+		AresPBGI18n.spec = inData.language;
+	} else {
+		AresPBGI18n.spec = navigator.language;
+	}
+});
+req.error(function(inSender, inError){
+	enyo.log("inError", inError);
+});
+req.go();
 
 (function() {
 	/**
@@ -68,9 +86,9 @@ var AresPBGI18n = {};
 	 * @returns {Object} Translation bundle based on a specific translation domain according to the locale specified
 	 * @public
 	 */
-	AresPBGI18n.setBundle = function (spec, path, bundle) {
+	AresPBGI18n.setBundle = function (path, bundle) {
 		return new ilib.ResBundle({
-			locale: new ilib.Locale(spec),
+			locale: new ilib.Locale(AresPBGI18n.spec),
 			type: "html",
 			name: "strings",
 			sync: true,

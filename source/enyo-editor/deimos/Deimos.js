@@ -1,7 +1,7 @@
 /*global ProjectKindsModel, enyo, ares, AresI18n, setTimeout */
 
 /* ilibDeimos covers Deimos specific translations. */
-var ilibDeimos = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/enyo-editor/deimos/resources"));
+var ilibDeimos = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/enyo-editor/deimos/resources"));
 
 enyo.kind({
 	name: "Deimos",
