@@ -35,6 +35,10 @@ enyo.kind({
 				{kind: "onyx.IconButton", src: "assets/images/code_editor.png", ontap: "closeDesigner"},
 				{kind: "onyx.Tooltip", content: ilibAres("Code editor")}
 			]},
+			{name: "cssHeraDecorator", kind: "onyx.TooltipDecorator", components: [
+				{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
+				{kind: "onyx.Tooltip", content: $L("Css Designer")}
+			]},
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
 			]}
@@ -83,6 +87,9 @@ enyo.kind({
 				]},
 				{components: [
 					{kind: "Deimos"}
+				]},
+				{components: [
+					{kind: "Ares.Hera"},
 				]}
 			]
 		}
@@ -91,6 +98,7 @@ enyo.kind({
 		onShowWaitPopup: "",
 		onHideWaitPopup: "",
 		onAllDocumentsAreClosed: "",
+		onCloseCss: "",
 		onRegisterMe: "",
 		onMovePanel:"",
 		onDesignerBroken: "",
@@ -107,7 +115,12 @@ enyo.kind({
 		onErrorTooltipReset: "resetErrorTooltip",
 		onAceGotFocus: "switchProjectToCurrentDoc",
 		onChildRequest: "handleCall",
-		onAceFocus: "aceFocus"
+		onAceFocus: "aceFocus",
+		onNewcss: "newCss",
+		onReplacecss: "replacecss",
+		onCssDocument: "cssDocument",
+		onEditcss: "doCss",
+		onReflowed: "reflowed"
 	},
 	debug: false,
 	create: function() {
@@ -218,7 +231,7 @@ enyo.kind({
 			this.userSyntaxErrorPop();
 		} else {
 			this.$.phobos.designerAction(ares.noNext);
-			this.manageControls(true);
+			this.manageControls('designer', 'js');
 		}
 	},
 	enableDesignerButton: function(enable) {
@@ -230,7 +243,14 @@ enyo.kind({
 	},
 
 	closeDesigner: function(inSender, inEvent){
-		this.$.deimos.closeDesigner(/* bleach */ true);
+		if (this.activeDocument.getCurrentIF() === 'hera') {
+			this.$.hera.csssave();
+			this.manageControls('code','css');
+			this.$.panels.setIndex(0);
+			this.$.toolbar.resized();
+		} else {
+			this.$.deimos.closeDesigner(/* bleach */ true);
+		}
 		return true;
 	},
 
@@ -238,7 +258,7 @@ enyo.kind({
 		this.trace();
 		this.$.panels.setIndex(this.phobosViewIndex);
 		this.activeDocument.setCurrentIF('code');
-		this.manageControls(false);
+		this.manageControls('code','js');
 		this.aceFocus();
 	},
 
@@ -246,22 +266,40 @@ enyo.kind({
 	 * Change controls on the panel top toolbar
 	 * 
 	 * @private
-	 * @param {boolean} designer, designer = true if designer's controls should be available
+	 * @param {string} 'code' 'hera' or 'designer', which controls should be available
+	 * @param {string} 'js' or 'css' file type that can switch to graphical editor
 	 */
-	manageControls: function(designer){
-		this.setAceActive(!designer);
+	manageControls: function(mode, type){
+		var cssMode      = mode === 'hera' ;
+		var designerMode = mode === 'designer' ;
+		var codeMode     = mode === 'code' ;
+		this.log('called with mode ' + mode );
+
+		this.setAceActive( codeMode );
 
 		//designer mode items
-		this.$.designerFileMenu.setShowing(designer);
-		this.$.docLabel.setShowing(designer);
-		this.$.deimosKind.setShowing(designer);
-		this.$.codeEditorDecorator.setShowing(designer);
-		//code editor mode items
-		this.$.editorFileMenu.setShowing(!designer);
-		this.$.newKindDecorator.setShowing(!designer);
-		this.$.editorSettingDecorator.setShowing(!designer);
-		this.$.designerButtonContainer.setShowing(!designer);
+		this.$.designerFileMenu.setShowing(designerMode);
+		this.$.docLabel.setShowing(designerMode);
+		this.$.deimosKind.setShowing(designerMode);
 
+		// hera mode items
+		this.$.cssHeraDecorator.setShowing(codeMode);
+
+		//code editor mode items
+		this.$.editorFileMenu.setShowing(codeMode);
+		this.$.newKindDecorator.setShowing(codeMode);
+		this.$.editorSettingDecorator.setShowing(codeMode);
+
+		// navigation buttons
+		this.$.codeEditorDecorator.setShowing(designerMode || cssMode);
+
+		if (type == 'js') {
+			this.$.designerButtonContainer.setShowing(codeMode);
+		} else if (type == 'css') {
+			this.$.cssHeraDecorator.setShowing(codeMode);
+		}
+
+		this.$.toolbar.reflow();
 		this.$.toolbar.resized();
 	},
 	switchGrabberDirection: function(active){
@@ -655,7 +693,13 @@ enyo.kind({
 	handleSwitchDoc: function(inSender, inEvent) {
 		var newDoc = Ares.Workspace.files.get(inEvent.userId);
 		this.trace(inEvent.id, newDoc);
+	
+		if(this.$.panels.getIndex() === 2){		// save  hera if user switches tabs away from hera
+			this.$.hera.csssave();
+			this.reflowed();
+		}
 		this.switchToDocument(newDoc, ilibAres("Switching file..."), inEvent.next);
+
 		return true;
 	},
 
@@ -780,7 +824,9 @@ enyo.kind({
 		Ares.Workspace.projects.setActiveProject( newProject.getName() );
 
 		var deimos = this.$.deimos ;
-		var willManageControls = false ;
+		var manageControlParam = 'code' ;
+		var type = newDoc.getName().match(/\w+$/) ;
+		this.log("edit file type: " + type);
 
 		var todo = [];
 		// enable designer only if code analysis was successful
@@ -795,16 +841,24 @@ enyo.kind({
 					next();
 				}).bind(this)
 			);
+		}  else if(currentIF === 'hera') {
+			todo.push(
+				(function(next) {
+					this.$.panels.setIndex(2);
+					manageControlParam = 'hera';
+					next();
+				}).bind(this)
+			);
 		} else if (codeOk) {
 			// really switch to designer if code is fine and already in designer mode
-			willManageControls = true ;
+			manageControlParam = 'designer' ;
 			todo.push(
 				phobos.designerAction.bind(phobos)
 			) ;
 		}
 
 		var _switchDocEnd = function (err) {
-			this.manageControls(willManageControls);
+			this.manageControls(manageControlParam, type) ;
 			this._fileEdited();
 			this.$.toolbar.resized();
 			this.$.docToolBar.activateDocWithId(newDoc.getId());
@@ -1026,8 +1080,69 @@ enyo.kind({
 
 	loadDesignerUI: function(inData, next) {
 		this.$.deimos.loadDesignerUI(inData, next);
-	}
+	},
+	
+	/**
+	 *  @private
+	 * show controls and load data
+	 */
+	doCss: function (){
+		this.$.phobos.cssAction();
+		this.manageControls('hera', 'css');
+		this.$.toolbar.resized();
+	},
 
+	/*
+	* write the new css to the end of the file
+	* @protected
+	*/
+	newCss: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
+		this.$.phobos.newcss(this.$.hera.out);
+	},
+	
+	/*
+	* replace the old data in the css file with the new css rules
+	* @protected
+	*/
+	replacecss: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
+		this.$.phobos.replacecss(this.$.hera.old, this.$.hera.out);
+	},
+	
+	
+	/*
+	* open hera
+	* @protected
+	*/
+	cssDocument: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
+		this.$.hera.cssload(inEvent);
+		this.$.panels.setIndex(2) ;
+		this.activeDocument.setCurrentIF('hera');
+	},
+	
+	/*
+	* a reflow to fix deimos fro poking through here
+	*/
+	reflowed: function(inSender, inEvent){
+		this.trace(inSender, inEvent);
+	
+		var width = this.width * 3;
+		var index = this.$.panels.getIndex();
+		var styleis = "-webkit-transform: translateX(" + width + "px);";
+		
+		if(index === 1 ){
+			width = 0;
+			styleis = "-webkit-transform: translateX(" + width + "px);";
+			this.$.deimos.setStyle(styleis);
+		}	
+		
+		if(index === 2 ){
+			this.$.deimos.setStyle(styleis);
+		}
+	}
+	
 });
 
 /**

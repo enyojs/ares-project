@@ -96,7 +96,6 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
-
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -531,7 +530,9 @@ enyo.kind({
 			}
 		},
 		instance: null
-	}
+	},
+
+
 });
 
 if ( ! Ares.isBrowserSupported()) {

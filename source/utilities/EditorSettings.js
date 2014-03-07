@@ -19,6 +19,7 @@ enyo.kind({
 			wordwrap: false,
 			rightpane: true,
 			autoTrace: false,
+			hera: false,
 			autoTraceLine: 'this.log("sender:", inSender, ", event:", inEvent);',
 			keys:{ }
 		},
@@ -40,6 +41,10 @@ enyo.kind({
 					{classes: "ares-row", components: [
 						{name: "rightpane",tag:"label",  classes: "ares-fixed-label ace-label", content: ilibUtilities("Right Panel (only for js files)")},
 						{name: "rightPaneButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "rightPaneChanged"}
+					]},
+					{classes: "ares-row", components: [
+						{name: "hera",tag:"label",  classes: "ares-fixed-label ace-label", content: "Css editor (experimental)"},
+						{name: "heraButton", kind: "onyx.ToggleButton", onContent: "On", offContent: "Off", onChange: "heraChanged"}
 					]}
 				]},
 				{kind:"FittableRows", components: [
@@ -185,7 +190,7 @@ enyo.kind({
 		this.$.highLightButton.value = this.settings.highlight;
 		this.$.wordWrapButton.value = this.settings.wordwrap;
 		this.$.rightPaneButton.value = this.settings.rightpane;
-
+		this.$.heraButton.value = this.settings.hera;
 		this.$.autoTraceButton.value = this.settings.autoTrace;
 		this.$.autoTraceInputLine.setValue(this.settings.autoTraceLine);
 		this.$.autoTraceInputBox.setShowing(this.settings.autoTrace);
@@ -281,6 +286,7 @@ enyo.kind({
 		}, this);
 
 		this.$.rightPaneButton.setValue(settings.rightpane);
+		this.$.heraButton.setValue( settings.hera);
 	},
 
 	themeSelected: function(inSender, inEvent) {
@@ -379,6 +385,12 @@ enyo.kind({
 		this.doChangeSettings();
 	},
 	
+	heraChanged: function(inSender, inEvent){
+		this.log("sender:", inSender, ", event:", inEvent);
+		this.previewSettings.hera = inEvent.value;
+		this.doChangeSettings();
+	},
+
 	aTrace: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.autoTrace = inEvent.value;

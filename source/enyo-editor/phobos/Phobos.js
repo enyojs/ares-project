@@ -51,12 +51,14 @@ enyo.kind({
 	events: {
 		onError: "",
 		onRegisterMe: "",
+		onCssDocument: "",
 		onFileEdited: " ",
 		onChildRequest: "",
-		onAceFocus: ""
+		onAceFocus: "",
+		onReflowed: ""
 	},
 	handlers: {
-		onCss: "newcssAction",
+		onNewcss: "newcss",
 		onReparseAsked: "reparseAction",
 		onInitNavigation: "initNavigation",
 		onNavigateInCodeEditor: "navigateInCodeEditor"
@@ -145,7 +147,7 @@ enyo.kind({
 
 		this.docData.setMode(mode);
 
-		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettings.getSettingFromLS().rightpane);
+		var hasAce = this.adjustPanelsForMode(mode, this.$.editorSettings.getSettingFromLS());
 
 		if (hasAce) {
 			var aceSession = this.docData.getAceSession();
@@ -178,8 +180,16 @@ enyo.kind({
 		return codeOk;
 	},
 
-	adjustPanelsForMode: function(mode, rightpane) {
-		this.trace("mode:", mode);
+	/**
+	 * Show/hide right panel and button depending on editor mode and editor settings.
+	 * settings is used for right panel and css editor button
+	 * @param {String} mode. typically 'javascript', 'css'...
+	 * @param {Object} settings
+	 * @returns {Boolean}
+	 */
+	adjustPanelsForMode: function(mode, settings) {
+		this.trace("mode:", mode, " settings:", settings);
+
 		var showModes = {
 			javascript: {
 				imageViewer: false,
@@ -188,7 +198,8 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: true,
 				designerDecorator: true,
-				right: rightpane
+				cssButton: false,
+				right: settings.rightpane
 			},
 			image: {
 				imageViewer: true,
@@ -197,6 +208,7 @@ enyo.kind({
 				saveAsButton: false,
 				newKindButton: false,
 				designerDecorator: false,
+				cssButton: false,
 				right: false
 			},
 			text: {
@@ -206,7 +218,28 @@ enyo.kind({
 				saveAsButton: true,
 				newKindButton: false,
 				designerDecorator: false,
+				cssButton: false,
 				right: false
+			},
+			css: {
+				imageViewer: false,
+				aceWrapper: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerDecorator: false,
+				cssButton: settings.hera,
+				right: false		
+			},
+			less: {
+				imageViewer: false,
+				aceWrapper: true,
+				saveButton: true,
+				saveAsButton: true,
+				newKindButton: false,
+				designerDecorator: false,
+				cssButton: settings.hera,
+				right: false		
 			}
 		};
 
@@ -250,8 +283,8 @@ enyo.kind({
 			image:		{rightIndex: 0}
 		};
 
-		var settings = modes[mode]||modes['text'];
-		this.$.right.setIndex(settings.rightIndex);
+		var show = modes[mode]||modes['text'];
+		this.$.right.setIndex(show.rightIndex);
 		this.resizeHandler();
 		return showSettings.aceWrapper ;
 	},
@@ -883,14 +916,14 @@ enyo.kind({
 	},
 	changeRightPane: function(settings){
 		if(this.docData){
-			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+			this.adjustPanelsForMode(this.docData.getMode(), settings);
 		}	
 	},
 	applySettings: function(settings){
 		//apply Ace settings
 		this.$.aceWrapper.applyAceSettings(settings);
 		if(this.docData){
-			this.adjustPanelsForMode(this.docData.getMode(), settings.rightpane);
+			this.adjustPanelsForMode(this.docData.getMode(), settings);
 		}
 	},	
 	fkeypressed: function(inSender, inEvent) {
@@ -924,10 +957,38 @@ enyo.kind({
 			setTimeout(next,0);
 		}
 	},
+	cssAction: function(){
+	// Update the projectIndexer and notify watchers
+		this.reparseAction();
+		
+		var data = {
+				projectData: this.projectData,
+				fileIndexer: this.analysis
+			};
+		this.doCssDocument(data);
+	},
+	/*
+	* Add new css to end of current file
+	*
+	*/
+	newcss: function(inSender, inEvent){
+		this.$.aceWrapper.insertAtEndOfFile(inSender);
+	},
+	/*
+	* replace the old css with edited css 
+	*
+	*/
+	replacecss: function(old_css, new_css){
+		var options = {backwards: false, wrap: true, caseSensitive: false, wholeWord: false, regExp: false};
+		this.$.aceWrapper.gotoLine(0,0);
+		this.$.aceWrapper.find(old_css, options);
+		this.$.aceWrapper.replace(old_css, new_css, options);
+	},
 	resizeHandler: function() {
 		this.inherited(arguments);
 		this.$.body.reflow();
 		this.$.aceWrapper.resize();
+		this.doReflowed();
 	}
 });
 
@@ -958,14 +1019,10 @@ enyo.kind({
 		{// right panel for HTML goes here
 		},
 		{kind: "enyo.Control", classes: "enyo-fit",	components: [ // right panel for CSS here
-			{kind: "cssBuilder", classes: "enyo-fit ares_phobos_panel border", onInsert: "test"}
 		]}
 	],
 	create: function() {
 		this.inherited(arguments);
-	},
-	test: function(inEvent) {
-		this.doCss(inEvent);
 	},
 	sendInitHelperReapeter: function(inSender, inEvent) {
 		this.doInitNavigation({item: inEvent.item});
