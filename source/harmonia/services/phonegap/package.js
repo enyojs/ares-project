@@ -1,0 +1,10 @@
+enyo.depends(
+	"$lib/enyo-ilib",
+	"I18n.js",
+	"PhonegapUiData.js",
+	"ProjectProperties.js",
+	"BuildStatusUI.js",
+	"PhonegapUIRows.js",
+	"Build.js",
+	"QrCode.js"	
+);

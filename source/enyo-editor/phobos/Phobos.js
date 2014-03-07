@@ -1,7 +1,7 @@
 /*global analyzer, ares, enyo, AresI18n, ProjectCtrl, setTimeout */
 
 /* ilibPhobos covers Phobos specific translations. */
-var ilibPhobos = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/enyo-editor/phobos/resources"));
+var ilibPhobos = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/enyo-editor/phobos/resources"));
 
 enyo.kind({
 	name: "Phobos",
@@ -49,7 +49,6 @@ enyo.kind({
 		}
 	],
 	events: {
-		onHideWaitPopup: "",
 		onError: "",
 		onRegisterMe: "",
 		onCssDocument: "",
@@ -122,7 +121,6 @@ enyo.kind({
 		var file = this.docData.getFile();
 		var extension = file.name.split(".").pop();
 
-		this.hideWaitPopup();
 		this.analysis = null;
 
 		var mode = {
@@ -289,9 +287,6 @@ enyo.kind({
 		this.$.right.setIndex(show.rightIndex);
 		this.resizeHandler();
 		return showSettings.aceWrapper ;
-	},
-	hideWaitPopup: function() {
-		this.doHideWaitPopup();
 	},
 	//
 	setAutoCompleteData: function() {

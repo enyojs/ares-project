@@ -712,7 +712,7 @@ app.configure(function(){
 	app.use(express.favicon(myDir + '/assets/images/ares_48x48.ico'));
 
 	["preview", "ide"].forEach(function(client) {
-		var dir = path.resolve(myDir, "_" + client);
+		var dir = path.resolve(myDir, "_ares");
 		if (argv['dev-mode'] || !fs.existsSync(dir)) {
 			dir = myDir;
 		}
@@ -747,6 +747,10 @@ app.configure(function(){
 	});
 	app.get('/res/aboutares', function(req, res, next) {		
 		res.status(200).json({aboutAres: aresAboutData});
+	});
+	app.get('/res/language', function(req, res, next) {
+		log.verbose('main', m("GET /res/language:", ide.res.language));		
+		res.status(200).json({language: ide.res.language});
 	});
 	app.all('/res/services/:serviceId/*', proxyServices);
 	app.all('/res/services/:serviceId', proxyServices);

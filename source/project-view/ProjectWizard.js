@@ -719,7 +719,7 @@ enyo.kind({
 	floating: true,
 	autoDismiss: false,
 	folderChooser: true,
-	serverSelectable: false,
+	//serverSelectable: false,
 	classes: "enyo-unselectable",
 	events: {
 		onAddProjectInList: "",

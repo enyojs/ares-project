@@ -3,9 +3,9 @@ enyo.kind({
 	name:"Ares.EnyoEditor",
 	kind:"FittableRows", 
 	components:[
-		{kind: "onyx.MoreToolbar", name:"toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
+		{kind: "onyx.MoreToolbar", name: "toolbar", classes: "ares-top-toolbar ares-designer-panels", components: [
 			{kind: "onyx.Grabber", classes: "ares-grabber ares-icon", ontap: "activePanel", components:[
-				{kind: "aresGrabber", name: "aresGrabberDirection", classes:"lleftArrow"}
+				{kind: "aresGrabber", name: "aresGrabberDirection", classes: "lleftArrow"}
 			]},
 			{name: "designerFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
 			{name: "editorFileMenu", kind: "Ares.FileMenu", onSelect: "fileMenuItemSelected"},
@@ -38,10 +38,6 @@ enyo.kind({
 			{name: "cssHeraDecorator", kind: "onyx.TooltipDecorator", components: [
 				{name: "cssButton", kind: "onyx.IconButton", Showing: "false", src: "assets/images/designer.png", ontap: "doCss"},
 				{kind: "onyx.Tooltip", content: $L("Css Designer")}
-			]},
-			{name: "codePreviewDecorator", kind: "onyx.TooltipDecorator", classes: "ares-icon", components: [
-				{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_preview.png", ontap: "requestPreview"},
-				{kind: "onyx.Tooltip", name:"previewTooltip", content: ilibAres("Preview")}
 			]},
 			{classes:"ares-logo-container", components:[
 				{name:"logo", kind:"Ares.Logo"}
@@ -150,7 +146,7 @@ enyo.kind({
 
 	activePanel : function(){
 		// my index within the main Ares panels, not index phobos and deimos panels
-		this.doMovePanel({panelIndex:this.panelIndex});
+		this.doMovePanel({panelIndex: this.panelIndex});
 	},
 	showDeimosPanel: function () {
 		this.$.panels.setIndex(1) ;
@@ -309,9 +305,6 @@ enyo.kind({
 	switchGrabberDirection: function(active){
 		this.$.aresGrabberDirection.switchGrabberDirection(active);
 	},
-	addPreviewTooltip: function(message){
-		this.$.previewTooltip.setContent(message);
-	},
 	updateDeimosLabel: function(edited) {
 		if (edited) {
 			this.$.docLabel.setContent("Deimos *");
@@ -370,36 +363,6 @@ enyo.kind({
 		}
 		// backbone collection
 		Ares.Workspace.files.filter(isProjectDoc).forEach(action, this);
-	},
-
-	/**
-	 * request to save project files one by one and then launch
-	 * preview
-	 */
-	requestPreview: function() {
-		var previewer = ComponentsRegistry.getComponent("projectView");
-		var project = Ares.Workspace.projects.getActiveProject();
-		var serialSaver = [] ;
-		this.trace("preview requested on project " + project.getName());
-
-		// build the serie of functions to be fed to async.series
-		this.foreachProjectDocs(
-			function(doc) {
-				serialSaver.push(
-					this.requestSave.bind(this, doc)
-				);
-			}
-		);
-
-		// the real work is done below
-		async.series(
-			serialSaver,
-			function(err) {
-				if (! err) {
-					previewer.launchPreview(project);
-				}
-			}
-		);
 	},
 
 	// Save actions
@@ -787,13 +750,13 @@ enyo.kind({
 
 		// select project if the document comes from a different
 		// project compared to the project of the previous document
-		if (!oldProject || oldProject.getName() !== newName){
+		if (oldProject !== undefined && oldProject.getName() !== newName) {
 			var pname =  oldProject ? "from " + oldProject.getName()  + " " : "" ;
 			this.trace("also switch project " + pname + ' to ' + newDoc.getProjectData().getName());
 			var project = Ares.Workspace.projects.get(newDoc.getProjectData().id);
 			var projectList = ComponentsRegistry.getComponent("projectList");
 
-			this.doShowWaitPopup({msg: ilibAres("Switching project...")});
+			popupMsg = ilibAres("Switching project...");
 
 			this.resetErrorTooltip();
 
@@ -859,8 +822,6 @@ enyo.kind({
 		this.activeDocument = newDoc;
 		newProject = newDoc.getProjectData() ;
 		Ares.Workspace.projects.setActiveProject( newProject.getName() );
-
-		this.addPreviewTooltip(ilibAres("Preview {projectID}", {projectID: newProject.id}));
 
 		var deimos = this.$.deimos ;
 		var manageControlParam = 'code' ;

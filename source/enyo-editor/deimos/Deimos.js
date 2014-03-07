@@ -1,4 +1,7 @@
-/*global ProjectKindsModel, enyo, ares, setTimeout */
+/*global ProjectKindsModel, enyo, ares, AresI18n, setTimeout */
+
+/* ilibDeimos covers Deimos specific translations. */
+var ilibDeimos = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/enyo-editor/deimos/resources"));
 
 enyo.kind({
 	name: "Deimos",
@@ -13,37 +16,54 @@ enyo.kind({
 			{name: "body", fit: true, classes: "deimos_panel_body", kind: "FittableColumns", components: [
 				{name: "palette", classes:"ares_deimos_left", kind: "Palette", ondragstart: "paletteDragStart"},
 				{name: "middle", classes: "ares-deimos-middle", fit: true, kind: "FittableRows", components: [
-					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
-						{kind: "onyx.Button", name: "reloadDesignerButton", classes: "deimos-designer-toolbar-spacing", content: "Reload", ontap: "reloadDesigner"},
-						{content: "Fit"},
-						{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
-						{content: "Size:"},
-						{kind: "Ares.PickerDecorator", classes: "deimos-designer-toolbar-spacing", components: [
-							{classes: "deimos-device-picker"},
-							{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
-								{content: "(600 x 800) Default",		value: { height: 800,  width: 600 }},
-								{content: "(1024 x 600) HP Slate7",      value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
-								{content: "(1920 x 1080) HDTV",			value: { height: 1080, width: 1920 }},
-								{content: "(320 x 480) iPhone\u2122",	value: { height: 480,  width: 320 }},
-								{content: "(320 x 573) iPhone\u2122 5",	value: { height: 573,  width: 320 }},
-								{content: "(1024 x 768) iPad\u2122",	value: { height: 768,  width: 1024 }},
-								{content: "Custom"}
+					{name: "middleToolbar", kind: "onyx.MoreToolbar", classes: "deimos-toolbar", components: [
+						{kind: "onyx.Button", name: "reloadDesignerButton", /*classes: "deimos-designer-toolbar-spacing",*/ content: ilibDeimos("Reload"), ontap: "reloadDesigner"},
+						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
+							{content: ilibDeimos("Fit:")},
+							{kind: "onyx.Checkbox", onchange: "autoZoomDesigner"}, //checkbox is here as a workaround for ENYO-3648
+							{content: ilibDeimos("Zoom:")},
+							{kind: "onyx.PickerDecorator", components: [
+								{name: "zoomPickerButton"},
+								{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
 							]}
 						]},
-						{content: "Width:"},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "onyx.Input", name: "designerWidthInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateWidth"}
+						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
+							{content: ilibDeimos("Device:")},
+							{kind: "Ares.PickerDecorator", /*classes: "deimos-designer-toolbar-spacing",*/ components: [
+								{classes: "deimos-device-picker"},
+								{kind: "onyx.Picker", name: "devicePicker", ontap: "deviceChosen", components: [
+									{content: ilibDeimos("Default"), value: { height: 800,  width: 600 }},
+									{content: "HP Slate7", value: { height:  1024, width:  600, ppi: 170, dpr: 1 }},
+									{content: "iPhone\u2122", value: { height: 480,  width: 320 }},
+									{content: "iPhone\u2122 4", value: { height:  960, width:  640, ppi: 326, dpr: 2 }},
+									{content: "iPhone\u2122 5", value: { height: 573,  width: 320 }},
+									{content: "iPad\u2122", value: { height: 768,  width: 1024 }},
+									{content: "iPad\u2122 Retina", value: { width: 2048, height: 1536, ppi: 264, dpr: 2 }},
+									{content: "iPad\u2122 2", value: { width: 1024, height:  768, ppi: 132, dpr: 1 }},
+									{content: "iPad\u2122 mini", value: { width: 1024, height:  768, ppi: 163, dpr: 1 }},
+									{content: "HDTV", value: { height: 1080, width: 1920 }},
+									{content: ilibDeimos("Custom")}
+								]}
+							]},
+							{kind: "Ares.PickerDecorator", /*classes: "deimos-designer-toolbar-spacing",*/ components: [
+								{name: "screenPickerButton", classes: "deimos-screen-picker"},
+								{kind: "onyx.Picker", name: "screenPicker", ontap: "screenChosen", components: [
+									{content: ilibDeimos("Portrait"), value: "portrait"},
+									{content: ilibDeimos("Landscape"), value: "landscape"}
+								]}
+							]}
 						]},
-						{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
-						{content: "Height:"},
-						{kind: "onyx.InputDecorator", components: [
-							{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: "Auto", onchange: "updateHeight"}
-						]},
-						{content: "Zoom"},
-						{kind: "onyx.PickerDecorator", components: [
-							{name: "zoomPickerButton"},
-							{name: "zoomPicker", kind: "onyx.Picker", onSelect: "zoomDesigner", components: []}
-						]}
+						{kind: "FittableColumns", classes: "deimos-toolbar-section", components: [
+							{content: ilibDeimos("Width (px):")},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "onyx.Input", name: "designerWidthInput", classes: "deimos-designer-input", placeholder: ilibDeimos("Auto"), onchange: "updateWidth"}
+							]},
+							{kind: "onyx.Button", name: "swapDesignerDimensionsButton", classes: "deimos-swap-dimensions-button", allowHtml: true, content: "&larr;<br/>&rarr;", ontap: "swapDesignerDimensions"},
+							{content: ilibDeimos("Height (px):")},
+							{kind: "onyx.InputDecorator", components: [
+								{kind: "onyx.Input", name: "designerHeightInput", classes: "deimos-designer-input", placeholder: ilibDeimos("Auto"), onchange: "updateHeight"}
+							]}
+						]}						
 					]},
 					{kind: "Scroller", classes: "deimos-designer-wrapper", fit: true, components: [
 						{kind: "Designer", name: "designer",
@@ -60,9 +80,9 @@ enyo.kind({
 				]},
 				{name: "right", classes:"ares_deimos_right", kind: "FittableRows", components: [
 					{kind: "onyx.MoreToolbar", classes: "deimos-toolbar deimos-toolbar-margined-buttons", components: [
-						{name:"deleteButton", kind: "onyx.Button", content: "Delete", classes: "btn-danger",  ontap: "deleteAction"},
-						{name:"undoButton", kind: "onyx.Button", content: "Undo", classes: "btn-danger",  ontap: "undoAction"},
-						{name:"redoButton", kind: "onyx.Button", content: "Redo", classes: "btn-danger",  ontap: "redoAction"}
+						{name:"deleteButton", kind: "onyx.Button", content: ilibDeimos("Delete"), classes: "btn-danger",  ontap: "deleteAction"},
+						{name:"undoButton", kind: "onyx.Button", content: ilibDeimos("Undo"), classes: "btn-danger",  ontap: "undoAction"},
+						{name:"redoButton", kind: "onyx.Button", content: ilibDeimos("Redo"), classes: "btn-danger",  ontap: "redoAction"}
 					]},
 
 					{kind: "ComponentView", classes: "deimos_panel ares_deimos_componentView",
@@ -75,9 +95,9 @@ enyo.kind({
 					},
 
 					{kind: "Inspector", fit: true, classes: "deimos_panel",
-					 onModify: "inspectorModify",
-					 onRequestPositionValue: "inspectorRequestPositionValue",
-					 onPositionDataUpdated: "inspectorPositionDataUpdated"
+						onModify: "inspectorModify",
+						onRequestPositionValue: "inspectorRequestPositionValue",
+						onPositionDataUpdated: "inspectorPositionDataUpdated"
 					}
 				]}
 			]}
@@ -107,6 +127,9 @@ enyo.kind({
 		this.trace("Creating Deimos");
 		this.inherited(arguments);
 		this.addHandlers();
+
+		// i18n checking
+		this.trace("ilibDeimos: Delete=", ilibDeimos("Delete"));
 	},
 	rendered: function() {
 		this.inherited(arguments);
@@ -117,10 +140,12 @@ enyo.kind({
 		this.trace("called");
 		var initItem = this.$.devicePicker.getClientControls()[0];
 		this.$.devicePicker.setSelected(initItem);
+		var initOrientation = this.$.screenPicker.getClientControls()[0];
+		this.$.screenPicker.setSelected(initOrientation);
 		this.deviceChosen();
 		var i, z;
 		for (i = 0; (z = this.zoomValues[i]); i++) {
-			this.$.zoomPicker.createComponent({content: z+"%", value: z, active: z === this.zoomValues[this.initZoomIndex]});
+			this.$.zoomPicker.createComponent({content: ilibDeimos("{z}%", {z: z}), value: z, active: z === this.zoomValues[this.initZoomIndex]});
 		}
 		this.zoomDesigner(null, {selected: this.$.zoomPicker.getSelected()});
 	},
@@ -863,21 +888,60 @@ enyo.kind({
 	},
 	//* When a device is chosen in the designer toolbar, set the appropriate heights/widths
 	deviceChosen: function() {
-		var selected = this.$.devicePicker.getSelected();
+		var device = this.$.devicePicker.getSelected();
 
-		if(!selected.value) {
-			return true; // stop bubble
+		if(!device.value) {
+			this.$.designerWidthInput.set("disabled", false);
+			this.$.designerHeightInput.set("disabled", false);
+			this.$.swapDesignerDimensionsButton.set("disabled", false);
+			this.$.screenPickerButton.set("disabled", true);
+		} else {
+			this.$.designerWidthInput.set("disabled", true);
+			this.$.designerHeightInput.set("disabled", true);
+			this.$.swapDesignerDimensionsButton.set("disabled", true);
+			this.$.screenPickerButton.set("disabled", false);
 		}
 
-		// Update fields with predefined values
-		this.$.designerWidthInput.setValue(selected.value.width);
-		this.$.designerHeightInput.setValue(selected.value.height);
+		this.screenChosen();
+
+		return true; // stop bubble
+	},
+	//* When a screen is chosen in the designer toolbar, set the appropriate heights/widths
+	screenChosen: function() {
+		var orientation = this.$.screenPicker.getSelected();
+		var device = this.$.devicePicker.getSelected();
+
+		var vertical = 0,
+			horizontal = 0;
+
+		if (device.value) {
+			if(orientation.value === "portrait") {
+				horizontal = device.value.width;
+				vertical = device.value.height;
+			} else {
+				horizontal = device.value.height;
+				vertical = device.value.width;
+			}
+
+			// Update fields with predefined values
+			this.$.designerWidthInput.setValue(horizontal);
+			this.$.designerHeightInput.setValue(vertical);
+		} else {
+			horizontal = this.$.designerWidthInput.getValue();
+			vertical = this.$.designerHeightInput.getValue();
+		}		
+
+		//this.$.deviceWidth.set("content", horizontal + " px");
+		//this.$.deviceHeight.set("content", vertical + " px");
 
 		// Force height/width value updates (change event isn't triggered)
-		this.$.designer.setWidth(selected.value.width);
-		this.$.designer.setHeight(selected.value.height);
+		this.$.designer.setWidth(horizontal);
+		this.$.designer.setHeight(vertical);
 
-		return true;
+		//this.$.middleToolbar.render();
+		//this.$.middleToolbar.set("fit", true);
+
+		return true; // stop bubble
 	},
 	updateHeight: function(inSender, inEvent) {
 		this.$.designer.setHeight(inSender.getValue());

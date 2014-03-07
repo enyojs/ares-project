@@ -1,4 +1,4 @@
-/*global ares, Phonegap, ServiceRegistry, enyo */
+/*global ares, Phonegap, ServiceRegistry, enyo, ilibPGB */
 
 /**
  * UI: Phonegap pane in the ProjectProperties popup
@@ -61,7 +61,7 @@ enyo.kind({
 						},
 						{
 							kind: "onyx.Tooltip",
-							content: "PhoneGap Build Help",
+							content: ilibPGB("PhoneGap Build Help"),
 							classes: "ares-tooltip-last-phoneGap"
 						}]
 					}]
@@ -106,6 +106,9 @@ enyo.kind({
 		this.inherited(arguments);
 
 		this.createAllDrawers();
+
+		// i18n checking
+		this.trace("ilibPGB: Cancel=", ilibPGB("Cancel"));
 	},
 
 	createAllDrawers: function() {
@@ -553,7 +556,7 @@ enyo.kind({
 	}],
 	create: function(){
 		this.inherited(arguments);
-		this.$.appIdPickerButton.setPickerContent("Select AppId");
+		this.$.appIdPickerButton.setPickerContent(ilibPGB("Select AppId"));
 	},
 	/**@private*/
 	userDataChanged: function() {
@@ -570,7 +573,7 @@ enyo.kind({
 		// Fill the AppId picker		
 		if (this.userData.user.apps.all.length === 0) {
 			this.$.AppIdList.createComponent({
-				content: "New Application",
+				content: ilibPGB("New Application"),
 				published: {
 					applicationObject: newApplicationObject
 				},
@@ -582,7 +585,7 @@ enyo.kind({
 			this.selectedAppIdChanged();
 
 			this.$.AppIdList.createComponent({
-				content: "New Application",
+				content: ilibPGB("New Application"),
 				published: {
 					applicationObject: newApplicationObject
 				},
@@ -615,7 +618,7 @@ enyo.kind({
 		this.$.buildStatusDisplay.$.statusMessage.setContent("");
 
 		//Update the value of the selected AppId
-		if (inValue.content === "New Application") {
+		if (inValue.content === ilibPGB("New Application")) {
 			this.setSelectedAppId("");
 		} else {
 			this.setSelectedAppId(inValue.selected.value);
