@@ -5,7 +5,7 @@
     @SET SCRIPT="%~dp0\..\ide.js"
 ) 
 
-@IF EXIST "%~dp0\node.exe" (
+@IF EXIST "%~dp0\x86\node.exe" (
   "%~dp0\x86\node.exe"  %SCRIPT% %*
 ) ELSE (
   node  %SCRIPT% %*

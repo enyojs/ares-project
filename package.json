@@ -72,29 +72,22 @@
 	"scripts" : {
 		"start": "node ide.js",
 		"install" : "node ./scripts/sub-npm.js",
+		"prepublish" : "node ./scripts/prepublish.js",
+		"postpublish" : "node ./scripts/postpublish.js",
 		"pretest" : "node ./scripts/test.js"
 	},
 	"files": [
 		"LICENSE-2.0.txt",
-		"ares",
-		"assets",
-		"deimos",
-		"enyo",
-		"harmonia",
+		"_ide",
+		"_preview",
+		"source/enyo-editor/deimos/designer/designerFrame",
+		"enyo/loader.js",
+		"enyo/tools",
 		"hermes",
-		"ide-test.json",
 		"ide.js",
 		"ide.json",
-		"lib",
-		"model",
-		"phobos",
-		"preview",
-		"project-view",
 		"runares.bat",
 		"scripts",
-		"services",
-		"templates",
-		"test",
-		"utilities"
+		"templates"
 	]
 }

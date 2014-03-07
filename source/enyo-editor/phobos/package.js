@@ -1,0 +1,9 @@
+enyo.depends(
+	"Phobos.js",
+	"AutoComplete.js",
+	"FindPopup.js",
+	"cssbuilder.css",
+	"ProjectCtrl.js",
+	"AceScroller.js",
+	"AceWrapper.js"
+);

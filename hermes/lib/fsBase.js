@@ -124,8 +124,9 @@ FsBase.prototype.route = function() {
 	}
 
 	var overlays = {
-		// "$deimos/source/designer/designerFrame/*"
-		designer: path.join(__dirname, "..", "..", "deimos", "source", "designer", "designerFrame"),
+		// "source/enyo-editor/deimos/designer/designerFrame/*"
+		// FIXME: should be somehow automatic
+		designer: path.join(__dirname, "..", "..", "source", "enyo-editor", "deimos", "designer", "designerFrame"),
 		// "node_modules/less/dist/*"
 		less: path.join(__dirname, "..", "..", "node_modules", "less", "dist")
 	};

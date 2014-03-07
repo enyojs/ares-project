@@ -1,0 +1,206 @@
+@import "lib/onyx/css/onyx-variables.less";
+
+/* Onyx variables overrides */
+/* ---------------------------------------*/
+
+@onyx-image-path : 'lib/onyx/images';
+
+/*Fonts*/
+
+@onyx-font-family : Arial,'Helvetica Neue', 'Nimbus Sans L', sans-serif;
+
+@onyx-font-size-small : 13px;
+
+@onyx-font-size-medium : 13px;
+
+@onyx-font-size-large : 13px;
+
+/*Colors*/
+
+@onyx-button-text-color : #ffffff;
+
+/* Border Radius */
+
+@onyx-border-radius : 6px;
+
+@onyx-border-radius-tight : 6px;
+
+@onyx-button-border-radius : @onyx-border-radius-tight;
+
+/* Backgrounds */
+
+@onyx-background : #EAEAEA;
+
+@onyx-button-background : darken(@onyx-background, 26.4%); /*#a7a7a7*/
+
+@onyx-picker-background : #ffffff;
+
+@onyx-groupbox-background : darken(@onyx-background, 62%);
+
+@onyx-checkbox-image: url("@{ares-image-path}/checkbox.png");
+@onyx-checkbox-image-height: 16px;
+@onyx-checkbox-image-width: 16px;
+
+/* Ares variables */
+/* ---------------------------------------*/
+
+@ares-image-path : 'assets/images';
+
+/* Fonts */
+
+@ares-font-size-large : 16px;
+
+/* Images */
+
+@ares-sprites : url("@{ares-image-path}/hp_ep_sprite.png");
+
+@ares-sprites-gradient : url("@{ares-image-path}/hp_ep_sprite_horizontal.png");
+
+@ares-sprites-vertical : url("@{ares-image-path}/hp_ep_sprite_vertical.png");
+
+@ares-button-gradient : @ares-sprites-gradient repeat-x 0px 0px ;
+
+@ares-toolbar-background : #090909;
+
+@ares-toolbar-gradient : @ares-sprites-gradient repeat-x 0px -123px @ares-toolbar-background;
+
+@ares-grabber-from-background : lighten(@ares-toolbar-background, 30%);
+
+@ares-grabber-to-background : lighten(@ares-toolbar-background, 10%);
+
+@ares-title-gradient : @ares-sprites-gradient repeat-x 0px -72px;
+
+@ares-small-arrow : url("@{ares-image-path}/smallArrowDown.png");
+
+@ares-lsmall-arrow : url("@{ares-image-path}/lsmallArrowDown.png");
+
+@ares-lsmall-dowm-arrow : @ares-sprites -130px -60px no-repeat;
+
+@option-down-arrow : @ares-sprites -134px -88px no-repeat;
+
+@ares-lrightArrow : @ares-sprites -204px -59px no-repeat;
+
+@ares-lleftArrow : @ares-sprites -179px -59px no-repeat;
+
+/* Colors */
+
+@ares-background : @onyx-background; /* #EAEAEA */
+
+@ares-backgound-hover : lighten(@ares-background, 1.4%); /*# eeeeee */
+
+@ares-light-background : darken(@ares-background, 5%); /*#ddd*/
+
+@ares-darken-background : darken(@ares-background, 31.6%); /*#999999*/
+
+@ares-dark-color : #000;
+
+@ares-light-color : #fff;
+
+@ares-input-text-color : @ares-dark-color;
+
+@ares-picker-text-color : #8C8C8C;
+
+@ares-menu-background : @onyx-picker-background;
+
+@ares-drawer-label: #282829;
+
+@ares-drawer-label-background: #C2C3C4;
+
+@ares-drawer-label-background-hover: #999EAD;
+
+@ares-background-filechooser : @ares-light-color;
+
+@ares-active-text-color : @ares-light-color;
+
+@ares-text-file-docbar : @ares-darken-background;
+
+@ares-groupbox-backgound : @ares-background;
+
+@ares-groupbox-border-color : @ares-darken-background;
+
+@ares-radiogroup-border-color : @ares-darken-background;
+
+@ares-radiogroup-text-color : darken(@ares-darken-background, 20%); /*#666*/
+
+@ares-radiogroup-active-background : #0088C2 ;
+
+@ares-radiogroup-active-border : (darken(@ares-radiogroup-active-background, 19%) + #0a0000); /*#0a4461*/
+
+@ares-radiogroup-boxshadow-color : @ares-radiogroup-active-border; /*ex : #0B4063*/
+
+@ares-deimos-background : lighten(@ares-background, 4.5%); /* whiteSmoke */
+
+@ares-ace-background : @ares-deimos-background;
+
+@ares-ace-border : darken(@ares-ace-background, 35%);
+
+@ares-deimos-border-color : lighten(@ares-background, 1.4%);
+
+@ares-harmonia-border-color : @ares-darken-background;
+
+@ares-preview-background : @ares-light-background;
+
+/* Ares popups */
+
+@ares-popup-backgrond-color : @ares-light-color;
+
+@ares-popup-text-color : @ares-dark-color;
+
+@ares-popup-bar-background-color : @ares-light-background;
+
+@ares-popup-bar-border-color : darken(@ares-background, 31.6%); /* #999999 */
+
+@ares-popup-title-height : 48px;
+
+/*Border radius*/
+
+@ares-border-radius : 4px;
+
+@ares-button-radius : @ares-border-radius;
+
+@ares-pannel-radius : @ares-border-radius + 1;
+
+@ares-drawer-radius : @ares-border-radius - 1;
+
+@ares-popup-radius : @ares-border-radius + 2;
+
+/* Project list */
+
+@ares-project-list-background-active : darken(@ares-background, 25%); /* #aaa */
+
+@ares-project-list-background-selected : lighten(@ares-project-list-background-active, 13.5%); /*#ccc*/
+
+@ares-project-list-border-color : darken(@ares-background, 20%); /* B7B7B7 */
+
+@ares-project-list-text-color : darken(@ares-background, 51.6%);/*#666666*/
+
+@ares-project-list-background-on : darken(@ares-background, 4.7%); /*dedede*/;
+
+/* Project preview */
+
+@ares-preview-padding : 6px;
+
+/* Ares mixins */
+
+.ares-rounded-corners (@radius: @ares-border-radius) {
+	-webkit-border-radius: @radius;
+	-moz-border-radius: @radius;
+	-ms-border-radius: @radius;
+	-o-border-radius: @radius;
+	border-radius: @radius;
+}
+
+.ares-box-shadow (@shadows) {
+	-o-box-shadow: @shadows;
+	-ms-box-shadow: @shadows;
+	-moz-box-shadow: @shadows;
+	-webkit-box-shadow: @shadows;
+	box-shadow: @shadows;
+}
+
+.ares-transform-origin(@origin) {
+	-moz-transform-origin : @origin;
+	-webkit-transform-origin : @origin;
+	-o-transform-origin : @origin;
+	-ms-transform-origin : @origin;
+}
