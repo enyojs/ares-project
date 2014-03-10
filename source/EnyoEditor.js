@@ -273,7 +273,7 @@ enyo.kind({
 		var cssMode      = mode === 'hera' ;
 		var designerMode = mode === 'designer' ;
 		var codeMode     = mode === 'code' ;
-		this.log('called with mode ' + mode );
+		this.trace('called with mode ' + mode );
 
 		this.setAceActive( codeMode );
 
@@ -826,7 +826,7 @@ enyo.kind({
 		var deimos = this.$.deimos ;
 		var manageControlParam = 'code' ;
 		var type = newDoc.getName().match(/\w+$/) ;
-		this.log("edit file type: " + type);
+		this.trace("edit file type: " + type);
 
 		var todo = [];
 		// enable designer only if code analysis was successful
