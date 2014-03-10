@@ -30,7 +30,7 @@ enyo.kind({
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
 				{kind: "onyx.MenuDecorator", classes: "aresmenu", onSelect: "menuItemSelected", components: [
-					{content: ilibHarmonia("Project"), name: "projectMenu", disabled: true},
+					{content: ilibHarmonia("Project"), name: "projectMenu", disabled: true, ontap: "manageBuildIntefaceAction"},
 					{kind: "onyx.Menu", floating: true, classes: "sub-aresmenu", maxHeight: "100%", components: [
 						{value: "doModifySettings",  classes: "aresmenu-button", components: [
 							{kind: "onyx.IconButton", src: "$assets/project-view/images/project_view_edit.png"},
