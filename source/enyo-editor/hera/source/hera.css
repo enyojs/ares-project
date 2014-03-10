@@ -1,0 +1,60 @@
+
+.hera_builder_font {
+    font-size: 10px;
+}
+
+.left-input-box{
+	padding-right: 4px;
+	border-radius: 4px;
+	margin: auto;
+}
+
+.left-input-col{
+	text-align: center;
+	padding-right: 4px;
+	margin: 5px;
+}
+
+.left-input-dec{
+	padding-left: 9px;
+}
+
+.list-sample {
+	background-color: gray;
+}
+.list-sample-list {
+	width: 100%;
+	height: 100%;
+	margin: auto;
+	background-color: #eee;
+}
+.list-sample-item {
+	font-size: 16px;
+	border:1px solid gray;
+	background-color: #F5F5F5; 
+}
+.list-sample-index {
+	float: right;
+	font-size: 16px;
+	font-weight: normal;
+}
+.list-sample-selected {
+	background-color: #c4e3fe;
+}
+/* needed to make onyx-highlight more specific for highlighting to work */
+.onyx-highlight.list-sample-selected {
+	background-color: #dedfdf;
+}
+
+.border_width_input  {
+	width: 90px;
+}
+
+.hera_newrule_button  {
+	margin: 5px;
+	width: 48%;
+}
+.hera_buttonbox  {
+	margin: 5px;
+}
+

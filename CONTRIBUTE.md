@@ -25,7 +25,6 @@ source/*            Multi-Project View
 │   └── phobos      Code Editor
 ├── harmonia        Access to Ares Server (ide.js) Services
 │   └── services
-├── preview         Preview Current Project
 ├── project-view    Single-Project View
 └── utilities       As it says...
 ```
@@ -145,6 +144,43 @@ In ares-rules.less onyx css classes and specific ares css classes use variables 
 To add new style to Ares, the file ares-rules.less should contain the new css classe. Check if one of variables can be used from ares-variables.less. Otherwise, add a new one.
 
 For more information see [this page](https://github.com/enyojs/enyo/wiki/UI-Theming).
+
+###Translating
+
+Ares 2 uses enyo-ilib (enyo wrapper of ilib library) to insure the translation of the application.
+Enyo-ilib allows to create several translation bundles to cover separately different parts of the application.
+Translation resources are ".json" files containing a set of reference entries and their related translation.
+Translation resources are managed according to an hierarchy which determine which translations must be applied.
+> See [ilib website](http://www.jedlsoft.com/) about translation resources hierarchy.
+
+**Translation resources are available in assets folders:**
+$assets
+├── enyo-editor
+│   ├── deimos
+│   │   └── resources: Deimos specific translations
+│   └── phobos
+│       └── resources: Phobos specific translations
+├── harmonia
+│   ├── resources: Harmonia specific translations
+│   └── services
+│       └── phonegap
+│           └── resources: PhoneGap Build specific translations (autonomous definition to anticipate a PhoneGap Build plugin)
+├── project-view
+│   └── resources: ProjectView specific translations
+├── resources: Ares main translations
+└── utilities
+    └── resources: Ares secondary (utilities widgets specific) translations
+
+Several translation bundles are used to concentrate close translation domains and reduce amount of translation entries in each tranlation resources.
+
+**Languages available are:**
+* english (per default)
+* fr (french)
+* kr (korean)
+
+**Language selection:**
+In ide.json, there's a 'language' entry used to force a specific language ("en" per default, another code instead) or to let Ares using the navigator's language (null).
+Don't forget to restart Ares to take changes in account...
 
 ### Testing
 

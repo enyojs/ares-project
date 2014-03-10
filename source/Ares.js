@@ -5,12 +5,12 @@ enyo.path.addPaths({
 });
 
 /* ilibAres covers Ares main translations */
-var ilibAres = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/resources"));
+var ilibAres = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/resources"));
 /* 
  * ilibUtilities covers Utilities specific translations.
  * Because ilibUtilities is used by Preview.js too, this bundle has been separated from Ares one.
  */
-var ilibUtilities = AresI18n.resolve.bind(null, AresI18n.setBundle(navigator.language, "$assets/utilities/resources")); 
+var ilibUtilities = AresI18n.resolve.bind(null, AresI18n.setBundle("$assets/utilities/resources")); 
 
 enyo.kind({
 	name: "Ares",
@@ -96,7 +96,6 @@ enyo.kind({
 	projectListIndex: 0,
 	hermesFileTreeIndex: 1,
 	enyoEditorIndex: 2,
-
 	projectListWidth: 300,
 	isProjectView: true,
 	create: function() {
@@ -531,7 +530,9 @@ enyo.kind({
 			}
 		},
 		instance: null
-	}
+	},
+
+
 });
 
 if ( ! Ares.isBrowserSupported()) {

@@ -1,7 +1,7 @@
 /*global ilib */
 /*
- * AresI18n is the entry point used to define translation bundle based on ilib library (http://www.jedlsoft.com/jedlsoft/ilib/jsdoc/) 
- * through enyo-ilib library wrapper.
+ * AresI18n is the entry point used to define global Ares translation bundles based on ilib library 
+ * (http://www.jedlsoft.com/jedlsoft/ilib/jsdoc/) through enyo-ilib library wrapper.
  * Translation bundles must be defined in the main kinds related to the translation domain covered by the translation resopurces
  * Translation bundles must, then, be declared as global in each kind that will require translation from the related domains.
  * Translation bundles insure the translation of simple or parametrized entries.
@@ -14,6 +14,24 @@
  *    var parametrizedTranslation = translationBundle("Parametrized message with {param1} and {param2}", {param1: value1, param2: value2});
  */
 var AresI18n = {};
+
+var origin = window.location.origin || window.location.protocol + "//" + window.location.host; // Webkit/FF vs IE
+
+var req = new enyo.Ajax({
+	url: origin + '/res/language'
+});
+req.response(function(inSender, inData){
+	if (inData.language) {
+		enyo.log("Ares forced language:", inData.language);
+		AresI18n.spec = inData.language;
+	} else {
+		AresI18n.spec = navigator.language;
+	}
+});
+req.error(function(inSender, inError){
+	enyo.log("inError", inError);
+});
+req.go();
 
 (function() {
 	/**
@@ -68,9 +86,9 @@ var AresI18n = {};
 	 * @returns {Object} Translation bundle based on a specific translation domain according to the locale specified
 	 * @public
 	 */
-	AresI18n.setBundle = function (spec, path, bundle) {
+	AresI18n.setBundle = function (path, bundle) {
 		return new ilib.ResBundle({
-			locale: new ilib.Locale(spec),
+			locale: new ilib.Locale(AresI18n.spec),
 			type: "html",
 			name: "strings",
 			sync: true,

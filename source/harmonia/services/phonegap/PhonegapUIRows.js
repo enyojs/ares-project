@@ -1,4 +1,4 @@
-/*global ares, Phonegap, enyo */
+/*global ares, Phonegap, enyo, ilibPGB */
 
 /**
  * Kind that define a generic row widget
@@ -167,7 +167,7 @@ enyo.kind({
 	 * @private
 	 */
 	labelChanged: function() {
-		this.$.label.setContent(this.name);
+		this.$.label.setContent(this.label);
 	},
 
 	/**
@@ -230,7 +230,7 @@ enyo.kind({
 	},
 	{
 		name: "errorMsg",
-		content: "The value must be a number",
+		content: ilibPGB("The value must be a number"),
 		showing: false,
 		classes: "ares-project-properties-input-error-message"
 	}],
@@ -619,7 +619,7 @@ enyo.kind({
 	},
 	{
 		name: "errorMsg",
-		content: "The value must be a number",
+		content: ilibPGB("The value must be a number"),
 		showing: false,
 		classes: "ares-project-properties-input-error-message"
 	}],
@@ -665,7 +665,7 @@ enyo.kind({
 	addNoneElement: function(inNoneValue) {
 		if (this.none !== undefined) {
 			this.$.configurationPicker.createComponent({
-				content: "None",
+				content: ilibPGB("None"),
 				value: inNoneValue,
 				active: false
 			});
@@ -707,7 +707,7 @@ enyo.kind({
 	updateConfigurationValue: function(inSender, inValue) {
 
 		if (this.checkActiveValue(inValue.content)) {
-			this.showErrorMessage(inValue.content, this.name, "Not an allowed value. Select another one using the picker.");
+			this.showErrorMessage(inValue.content, this.name, ilibPGB("Not an allowed value. Select another one using the picker."));
 		} else {
 			this.hideErrorMessage(this.name);
 			this.contentValueChanged();
@@ -768,7 +768,7 @@ enyo.kind({
 	/** @public */
 	setProjectConfig: function(config) {
 		if (this.checkActiveValue(config[this.jsonSection][this.name])) {
-			this.showErrorMessage(config[this.jsonSection][this.name], this.name, "Not an allowed value. Select another one using the picker.");
+			this.showErrorMessage(config[this.jsonSection][this.name], this.name, ilibPGB("Not an allowed value. Select another one using the picker."));
 		} else {
 			this.hideErrorMessage(this.name);
 			this.setValue(config[this.jsonSection][this.name]);
@@ -871,9 +871,9 @@ enyo.kind({
 			var maxSdkDisplayed = this.container.$["android-maxSdkVersion"].$.configurationPickerButton.content;
 			var tgtSdkDisplayed = this.container.$["android-targetSdkVersion"].$.configurationPickerButton.content;
 
-			this.container.$["android-minSdkVersion"].showErrorMessage(minSdkDisplayed, "android-minSdkVersion", "Inconsistent API level values");
-			this.container.$["android-maxSdkVersion"].showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", "Inconsistent API level values");
-			this.container.$["android-targetSdkVersion"].showErrorMessage(tgtSdkDisplayed, "android-targetSdkVersion", "Inconsistent API level values");
+			this.container.$["android-minSdkVersion"].showErrorMessage(minSdkDisplayed, "android-minSdkVersion", ilibPGB("Inconsistent API level values"));
+			this.container.$["android-maxSdkVersion"].showErrorMessage(maxSdkDisplayed, "android-maxSdkVersion", ilibPGB("Inconsistent API level values"));
+			this.container.$["android-targetSdkVersion"].showErrorMessage(tgtSdkDisplayed, "android-targetSdkVersion", ilibPGB("Inconsistent API level values"));
 		}
 		this.setValue(inValue.selected.value);
 		return true;
@@ -1029,9 +1029,9 @@ enyo.kind({
 	pathInputTap: function(inSender, inEvent) {
 		var header = "";
 		if (this.name === 'icon') {
-			header = $L("Select an icon file");
+			header = ilibPGB("Select an icon file");
 		} else if (this.name === 'splashScreen') {
-			header = $L("Select a splashscreen file");
+			header = ilibPGB("Select a splashscreen file");
 		}
 		this.doInputButtonTap({
 			header: header
@@ -1150,7 +1150,7 @@ enyo.kind({
 		} else {
 			var err = new Error("Height and Width values must be numbers");
 			this.doEnableErrorHighLight();
-			this.$.errorMsg.setContent(err.toString());
+			this.$.errorMsg.setContent(ilibPGB(err.toString()));
 			this.$.errorMsg.show();
 			this.doEnableErrorHighLight();
 			this.setErr(err);
@@ -1168,7 +1168,7 @@ enyo.kind({
 		} else {
 			var err = new Error("Height and Width values must be numbers");
 			this.doEnableErrorHighLight();
-			this.$.errorMsg.setContent(err.toString());
+			this.$.errorMsg.setContent(ilibPGB(err.toString()));
 			this.doEnableErrorHighLight();
 			this.$.errorMsg.show();
 			this.setErr(err);
@@ -1229,9 +1229,9 @@ enyo.kind({
 	pathInputTap: function(inSender, inEvent) {
 		var header = "";
 		if (this.name === 'icon') {
-			header = $L("Select an icon file");
+			header = ilibPGB("Select an icon file");
 		} else if (this.name === 'splashScreen') {
-			header = $L("Select a splashscreen file");
+			header = ilibPGB("Select a splashscreen file");
 		}
 		this.doInputButtonTap({
 			header: header
@@ -1275,7 +1275,7 @@ enyo.kind({
 	},
 	{
 		name: "noSigningKeys",
-		content: "No signing keys for this platform",
+		content: ilibPGB("No signing keys for this platform"),
 		showing: false
 	},
 	{
@@ -1308,7 +1308,7 @@ enyo.kind({
 				kind: "onyx.Input",
 				classes: "ares-project-properties-password",
 				type: "password",
-				placeholder: "Password"
+				placeholder: ilibPGB("Password")
 			}]
 		},
 
@@ -1323,12 +1323,12 @@ enyo.kind({
 				kind: "onyx.Input",
 				classes: "ares-project-properties-password",
 				type: "password",
-				placeholder: "Keystore password"
+				placeholder: ilibPGB("Keystore password")
 			}]
 		},
 		{
 			kind: "onyx.Button",
-			content: "Save",
+			content: ilibPGB("Save"),
 			ontap: "savePassword",
 			showing: false,
 			classes: "ares-project-properties-margin-right",
@@ -1340,7 +1340,7 @@ enyo.kind({
 		this.inherited(arguments);
 		this.labelChanged();
 		this.setProvider(Phonegap.ProjectProperties.getProvider());
-		this.$.keyPickerButton.setPickerContent("Choose...");
+		this.$.keyPickerButton.setPickerContent(ilibPGB("Choose..."));
 		this.activeKeyIdChanged();
 	},
 
@@ -1354,7 +1354,7 @@ enyo.kind({
 
 	activeKeyTitleChanged: function() {
 		this.$.activeSigningKey.setContent(this.getActiveKeyTitle());
-		this.$.loadingSingingKeys.setContent(" Loading signing keys ...");
+		this.$.loadingSingingKeys.setContent(ilibPGB(" Loading signing keys ..."));
 	},
 
 	/** @public */

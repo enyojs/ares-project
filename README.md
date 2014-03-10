@@ -64,6 +64,8 @@ Usage[](id:usage)
 
 ### Configuration
 
+#### Proxy
+
 Depending on your network environment, you may need to setup a proxy URL to access Internet through a
 [proxy server](http://en.wikipedia.org/wiki/Proxy_server).
 
@@ -77,6 +79,14 @@ By default, the service will get the proxy specified by
 `globalProxyUrl` parameter or by `https_proxy` environment variable or
 by `http_proxy` environment variable.
 
+#### Language
+
+Language used by Ares 2 is english per default (and forced). See the `language` configuration entry in [ide.json](ide.json).
+If the related language does not exist, a language will be defined according to the locale hierarchy managed by the [ilib library](http://www.jedlsoft.com/).
+This forced value could be modified / disabled: another language code string value / null.
+
+> **NB**: Don't forget to restart Ares 2.
+
 ### Install
 
 1. Install Node.js 0.10.19 (or later) & its associated NPM (Node Package Manager) from a binary distribution, for example at [nodejs.org](http://nodejs.org/download/)
@@ -88,6 +98,8 @@ by `http_proxy` environment variable.
 
 1. Once installed, run it using `node_modules/.bin/ares-ide` (or `node_modules\.bin\ares-ide.cmd`) on Windows.
 1. Please report the issues you find in our JIRA at [https://enyojs.atlassian.net/](https://enyojs.atlassian.net/) against the component named `ares`.
+
+> **NB:** Since ares-0.2.12, ares is minified as it is installed
 
 ### Run
 
@@ -116,6 +128,7 @@ Get more information about the options using `-h` or `--help`:
 	  -c, --config      IDE configuration file                                                                 [default: "./ide.json"]
 	  -l, --level       IDE debug level ('silly', 'verbose', 'info', 'http', 'warn', 'error')                  [default: "http"]
 	  -L, --log         Log IDE debug to ./ide.log                                                             [boolean]
+	  -D, --dev-mode	Load non-minified version of Ares and Enyo for Ares debug and development			   [boolean]
 
 In case you want to access other parts of your machine's file-system, refer to the [local filesystem service configuration](hermes/README.md#local-filesystem-service)
 
