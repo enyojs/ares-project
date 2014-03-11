@@ -215,7 +215,7 @@ In order to produce a minified Ares on a build server:
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
 
-1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ide` and `_preview` folders created by the `npm prepublish` stage that is built-in `npm pack`.
+1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ares` folder created by the `npm prepublish` stage that is built-in `npm pack`.
 
 		$ npm run-script postpublish
 
