@@ -78,8 +78,7 @@
 	},
 	"files": [
 		"LICENSE-2.0.txt",
-		"_ide",
-		"_preview",
+		"_ares",
 		"source/enyo-editor/deimos/designer/designerFrame",
 		"enyo/loader.js",
 		"enyo/tools",
