@@ -1,3 +1,11 @@
+## Translation
+[ENYO-3875 When minified, forced language is not used (loaded to late...)](https://enyojs.atlassian.net/browse/ENYO-3875) 
+
+Symptom: Ares under its minified form does not apply the forced language 
+value to select the right translations resources. It uses the navigator's 
+language as value to determine the tranlation to apply
+
+
 ## Designer
 
 Designer Drag&Drop feature works fine with Chrome Browser but is
