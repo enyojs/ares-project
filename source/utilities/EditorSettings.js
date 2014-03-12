@@ -67,6 +67,7 @@ enyo.kind({
 								{content: "idle_fingers"},
 								{content: "katzenmilch"},
 								{content: "kr_theme"},
+								{content: "kuroir"},
 								{content: "merbivore"},
 								{content: "merbivore_soft"},
 								{content: "mono_industrial"},
