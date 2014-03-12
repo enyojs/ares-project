@@ -74,6 +74,7 @@ enyo.kind({
 								{content: "pastel_on_dark"},
 								{content: "solarized_dark"},
 								{content: "solarized_light"},
+								{content: "terminal"},
 								{content: "textmate"},
 								{content: "tomorrow"},
 								{content: "tomorrow_night"},
