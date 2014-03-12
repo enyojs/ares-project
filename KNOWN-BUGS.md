@@ -1,10 +1,14 @@
 ## Translation
+
 [ENYO-3875 When minified, forced language is not used (loaded to late...)](https://enyojs.atlassian.net/browse/ENYO-3875) 
 
-Symptom: Ares under its minified form does not apply the forced language 
+Symptom: Ares under its minified form does not use the forced language 
 value to select the right translations resources. It uses the navigator's 
-language as value to determine the tranlation to apply
+language as value to determine the tranlation to apply. But in dev-mode, 
+it works well.
 
+Workaround: Non-english translation resources have been deactivated by 
+commenting their content.
 
 ## Designer
 
