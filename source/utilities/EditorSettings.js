@@ -65,6 +65,7 @@ enyo.kind({
 								{content: "eclipse"},
 								{content: "github"},
 								{content: "idle_fingers"},
+								{content: "katzenmilch"},
 								{content: "kr_theme"},
 								{content: "merbivore"},
 								{content: "merbivore_soft"},
