@@ -154,6 +154,7 @@ Translation resources are managed according to an hierarchy which determine whic
 > See [ilib website](http://www.jedlsoft.com/) about translation resources hierarchy.
 
 **Translation resources are available in assets folders:**
+```
 $assets
 ├── enyo-editor
 │   ├── deimos
@@ -170,6 +171,7 @@ $assets
 ├── resources: Ares main translations
 └── utilities
     └── resources: Ares secondary (utilities widgets specific) translations
+```
 
 Several translation bundles are used to concentrate close translation domains and reduce amount of translation entries in each tranlation resources.
 
@@ -181,6 +183,7 @@ Several translation bundles are used to concentrate close translation domains an
 **Language selection:**
 In ide.json, there's a 'language' entry used to force a specific language ("en" per default, another code instead) or to let Ares using the navigator's language (null).
 Don't forget to restart Ares to take changes in account...
+> *NB:* when minified, forced language is not used see [KNOWN-BUGS.md](KNOWN-BUGS.md).
 
 ### Testing
 
