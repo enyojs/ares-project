@@ -25,7 +25,7 @@ enyo.kind({
 	},
 	components: [
 		{kind:"FittableRows", classes:"enyo-fit", components:[
-			{kind: "onyx.MoreToolbar", classes: "ares-top-toolbar ares-harmonia-panels", components: [
+			{kind: "onyx.MoreToolbar", name: "moreToolbar", classes: "ares-top-toolbar ares-harmonia-panels", components: [
 				{kind: "onyx.Grabber", classes: "ares-grabber" , name: "filePanelGrabber", showing: false, ontap: "activePanel", components: [
 					{kind: "aresGrabber", name: "aresGrabberDirection"}
 				]},
@@ -61,6 +61,7 @@ enyo.kind({
 						]}
 					]}
 				]},
+				{fit: true},
 				{classes:"ares-logo-container", name: "logoContainer", components:[
 					{name:"logo", kind:"Ares.Logo"}
 				]}
@@ -196,9 +197,11 @@ enyo.kind({
 	},
 	showLogo:function(){
 		this.$.logoContainer.show();
+		this.$.moreToolbar.resized();
 	},
 	hideLogo:function(){
 		this.$.logoContainer.hide();
+		this.$.moreToolbar.resized();
 	},
 	/** @public */
 	disableProjectMenu: function(disabled){
