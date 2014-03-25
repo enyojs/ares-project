@@ -8,7 +8,7 @@ enyo.kind({
 	alt:"logo",
 	create:function(){
 		this.inherited(arguments);
-		this.setSource("/ide/assets/images/enyo-logo.png");
+		this.setSource("assets/images/enyo-logo.png");
 	},
 	setSource: function(src){
 		this.setAttribute("src", src);

@@ -1,9 +1,63 @@
 ChangeLog
 =========
+
+Ares Sprint 23 & 24 & so on... Jan 31th - Feb 13th / Feb 14th - Mar 06th / Mar 07th - Mar 25th
+----------------------------------------------------------------------------------------------
+
+**Release: ares-ide 0.2.12**
+
+Brief:
+
+* A major code re-layout has been performed to approach a possible MVC segmentation of the application
+* Minification of Ares 2 is now possible
+* Integration of an external contribution (John McConnell aka micro-tech) as experimental feature: Hera (CSS editor)
+
+Details:
+
+* ENYO-2627, Ares : Make possible to minify ares-project
+* ENYO-2938, Switch Ares from g11n to enyo-ilib
+* ENYO-3244, "Save all" is needed as "Close all"
+* ENYO-3561, Ares built apps have incorrect index.html in apk files
+* ENYO-3600, PGB UI must allow the user to define multiple Access Origin instances
+* ENYO-3626, Ares.openDocument() allows multiple file open in parallel
+* ENYO-3632, No callback for codeUpdate message
+* ENYO-3651, Ares: libraries update - up to 2.3.0-RC5 (above surely)
+* ENYO-3653, Opening the very first source code file causes a "Switching Project"
+* ENYO-3658, Switching to a non-Enyo project never ends
+* ENYO-3704, TabBar: right menu switches tabs but does not switch content
+* ENYO-3708, Re-layout Ares source code for EnyoEditor
+* ENYO-3735, Open existing non-Ares Enyo project has no effect
+* ENYO-3737, Unlabeled "Red X" icon opens up file location dialog for Select Top File
+* ENYO-3741, Project Preview: zoom slider do not fit the size of the application
+* ENYO-3743, Integrate Hera Css editor
+* ENYO-3753, replace the single "cancel" button by a "done" button in PGB service login window
+* ENYO-3754, Search Project is broken.
+* ENYO-3757, A template name too long it doesn't fit in the drop down.
+* ENYO-3760, Ares: Editor Settings aren't initialised if localStorage is empty
+* ENYO-3761, For a non PGB enabled project, build, install and run are still enabled as button actions
+* ENYO-3762, PGB Controls fails on new project - ENYO-3284 regression
+* ENYO-3763, partial french translation of "file" menu in the Ares Editor
+* ENYO-3784, PGB properties: at least one platform should be selected
+* ENYO-3786, Enyo-yui-charts: Cors issue
+* ENYO-3792, Preview/build command not available at hand
+* ENYO-3798, Wrong file content displayed after closing a file tab.
+* ENYO-3802, Ares: designer/preview buttons are overlapping
+* ENYO-3826, On EnyoEditor toolbar, tooltips like New Kind, Editor ... are lost
+* ENYO-3831, EnyoDesigner Button size issue; reload, fit checkbox, size drop down ...
+* ENYO-3836, Project Shell: switching too quickly between 2 files from a same project does an error
+* ENYO-3837, Project Shell: closing too quickly 2 files from a same project one after the other does an error
+* ENYO-3838, Project Shell: opening a first file for a project happends late after the "waiting" popup closure
+* ENYO-3842, Preview: resources not found after the "re-layout" operations
+* ENYO-3848, Plugins: bad instanciation of a provider if it has never been enabled once
+* ENYO-3851, It should be possible to select storage root to search for Ares projects
+* ENYO-3857, FileManager: no more template found for .js files
+* ENYO-3875, Ares: Language is always navigator's one when minified
+* ENYO-3881, Ares: plugins loading failed
+
 Ares Sprint 22 Jan 09th - Jan 30th
 -----------------------------------
 
-**Release: ares-ide 0.2.10**
+**Release: ares-ide 0.2.11**
 
 Brief:
 
