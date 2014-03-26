@@ -246,6 +246,7 @@ enyo.kind({
 		if (this.activeDocument.getCurrentIF() === 'hera') {
 			this.$.hera.csssave();
 			this.manageControls('code','css');
+			this.activeDocument.setCurrentIF('code');
 			this.$.panels.setIndex(0);
 			this.$.toolbar.resized();
 		} else {
@@ -1123,7 +1124,7 @@ enyo.kind({
 	},
 	
 	/*
-	* a reflow to fix deimos fro poking through here
+	* a reflow to fix deimos for poking through here
 	*/
 	reflowed: function(inSender, inEvent){
 		this.trace(inSender, inEvent);
