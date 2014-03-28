@@ -181,6 +181,7 @@ function preDist() {
 
 	run("pre-dist", [git, "submodule", "update", "--init", "--recursive"]);
 	run("pre-dist", [npm, "install"]);
+	run("pre-dist", [npm, "run-script", "minify"]);
 	run("pre-dist", [npm, "pack"]);
 	console.log(packageJson.name + "-" + version.version + ".tgz");
 }

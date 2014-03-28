@@ -50,18 +50,20 @@ Real stuff - Code
    
 		$ cd ares-project
 		$ npm -d install
+		$ npm run-script minify # trigger the minification
 
 1. Run Ares using `node ide.js --dev-mode` from the GitHub root folder (`--dev-mode` to avoid using the minified version of Ares)
 
-**Update workspace** if you already have a working environment (with a remote named `origin`), run the following sequence.
+	**Update workspace** if you already have a working environment (with a remote named `origin`), run the following sequence.
 
 		$ git fetch origin
 		$ git submodule foreach git fetch origin
 		$ git merge origin/master
 		$ git submodule update --init  --recursive
-		$ npm -d install						# Be sure to run "git submodule update ..." before "npm install"	
+		$ npm -d install						# Be sure to run "git submodule update ..." before "npm install"
+		$ npm run-script minify # trigger the minification	
 
-**Note:** 
+	**Note:** 
 
 1. Until recently, `ares-project/node_modules` contained 3rd-party modules directly archived into `ares-project` own Git repository.  So existing repository owners _may_ need to run `rm -rf ares-project/node_modules` to properly update their trees.
 
@@ -218,7 +220,7 @@ In order to produce a minified Ares on a build server:
 		$ npm install ../ares-project/ares-ide-0.0.2.tgz
 		$ node_modules/.bin/ares-ide
 
-1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ares` folder created by the `npm prepublish` stage that is built-in `npm pack`.
+1. Whatever the packaging/re-packaging option you choose, make sure you clean-up `_ares` folder created by the `npm run-script minify` stage that is built-in `npm pack`.
 
 		$ npm run-script postpublish
 

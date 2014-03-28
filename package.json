@@ -72,12 +72,13 @@
 	"scripts" : {
 		"start": "node ide.js",
 		"install" : "node ./scripts/sub-npm.js",
-		"prepublish" : "node ./scripts/prepublish.js",
+		"minify" : "node ./scripts/minify.js",
 		"postpublish" : "node ./scripts/postpublish.js",
 		"pretest" : "node ./scripts/test.js"
 	},
 	"files": [
 		"LICENSE-2.0.txt",
+		"*.md",
 		"_ares",
 		"source/enyo-editor/deimos/designer/designerFrame",
 		"enyo/loader.js",
@@ -85,8 +86,9 @@
 		"hermes",
 		"ide.js",
 		"ide.json",
-		"runares.bat",
 		"scripts",
-		"templates"
+		"templates",
+		"package.json",
+		"index.html"
 	]
 }
