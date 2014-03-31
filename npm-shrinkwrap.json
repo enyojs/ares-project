@@ -1,6 +1,6 @@
 {
   "name": "ares-ide",
-  "version": "0.2.12",
+  "version": "0.2.12.1",
   "dependencies": {
     "archiver": {
       "version": "0.4.10",
