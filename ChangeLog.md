@@ -4,7 +4,7 @@ ChangeLog
 Ares Sprint 23 & 24 & so on... Jan 31th - Feb 13th / Feb 14th - Mar 06th / Mar 07th - Mar 25th
 ----------------------------------------------------------------------------------------------
 
-**Release: ares-ide 0.2.12.1**
+**Release: ares-ide 0.2.12-1**
 
 Brief:
 
