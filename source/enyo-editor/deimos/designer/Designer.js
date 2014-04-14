@@ -95,7 +95,7 @@ enyo.kind({
 				};
 
 				this.trace("setup dead designer timer");
-				var timer = setTimeout(mopUp.bind(this.designer), 5000);
+				var timer = setTimeout(mopUp.bind(this.designer), 30000);
 
 				var myNext = function () {
 					this.trace("Clearing dead designer timer");
