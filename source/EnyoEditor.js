@@ -731,6 +731,7 @@ enyo.kind({
 			return;
 		}
 
+		var deimos = this.$.deimos ;
 		var oldDoc = this.activeDocument ; // may be undef when a project is closed
 		var oldProject = Ares.Workspace.projects.getActiveProject(); // may be undef before opening the first file
 		var safeNext = next; // function parameter is not a closure
@@ -761,13 +762,18 @@ enyo.kind({
 			this.resetErrorTooltip();
 
 			serial.push(
-				projectList.selectProject.bind(projectList, project)
+				function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
+				projectList.selectProject.bind(projectList, project),
+				deimos.projectSelected.bind(deimos, newDoc.getProjectData() )
+			);
+		} else {
+			serial.push(
+				function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();}
 			);
 		}
 
 		var that = this ;
 		serial.push(
-			function(_next) { that.doShowWaitPopup({msg: popupMsg}); _next();},
 			this._switchDoc.bind(this, newDoc),
 			function(_next) { that.aceFocus(); _next();}
 		);
@@ -823,17 +829,11 @@ enyo.kind({
 		newProject = newDoc.getProjectData() ;
 		Ares.Workspace.projects.setActiveProject( newProject.getName() );
 
-		var deimos = this.$.deimos ;
 		var manageControlParam = 'code' ;
 		var type = newDoc.getName().match(/\w+$/) ;
 		this.trace("edit file type: " + type);
 
 		var todo = [];
-		// enable designer only if code analysis was successful
-		if (codeOk) {
-			todo.push( deimos.projectSelected.bind(deimos, newDoc.getProjectData() ) ) ;
-		}
-
 		if (currentIF === 'code') {
 			todo.push(
 				(function(next) {
