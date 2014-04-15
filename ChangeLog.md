@@ -1,6 +1,15 @@
 ChangeLog
 =========
 
+**Release: ares-ide 0.2.13**
+
+Brief:
+* Bug fix release
+
+Details:
+* Fix error shown when loading big project
+* Fix error on file open done after closing designer (Closes: ENYO-4003)
+
 Ares Sprint 23 & 24 & so on... Jan 31th - Feb 13th / Feb 14th - Mar 06th / Mar 07th - Mar 25th
 ----------------------------------------------------------------------------------------------
 
