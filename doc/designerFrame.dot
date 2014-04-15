@@ -41,8 +41,8 @@ digraph G {
 	updating -> off [  label = "dfRequestReload\n⇧err.RequestReload" ] ;
 
 	off    -> reloading [ label = "✋projectSelected\nstoreCb\nload url⇩\nclear fsmStash", color =red ];
-	broken -> reloading [ label = "✋projectSelected\nstoreCb\nload url⇩", color =red ];
 	broken -> reloading [ label = "✋user render\npush render\nin fsmStash" ];
+	closed -> reloading [ label = "✋projectSelected\nstoreCb\nload url⇩", color =red ];
 
 	reloading -> initializing [ label = "dfLoaded\n⇧state.loaded\ninitializeOptions⇩" ] ;
 

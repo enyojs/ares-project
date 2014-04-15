@@ -36,7 +36,7 @@ enyo.kind({
 		initial: 'off',
 		events: [
 			// start designer
-			{name: 'projectSelected', from: ['off','ready','broken'], to: 'reloading'},
+			{name: 'projectSelected', from: ['off','ready','broken','closed'], to: 'reloading'},
 			{name: 'dfLoaded',        from: 'reloading',     to: 'initializing'},
 			{name: 'dfInitialized',   from: 'initializing',  to: 'initialized'},
 			{name: 'dfReady',         from: 'initialized',   to: 'ready'},
@@ -56,6 +56,8 @@ enyo.kind({
 			{name: 'dfSelected',      from: 'selecting',     to: 'ready'},
 			{name: 'dfSelect',        from: 'ready',         to: 'ready'},
 
+			// in FSM, closed means designer is cleaned up. This is not correlated with
+			// whether the designer is shown or not.
 			{name: 'cleanUp',         from: 'ready',         to: 'closed'},
 
 			{name: 'modifyProperty',  from: 'ready',         to: 'rendering'},
@@ -95,7 +97,7 @@ enyo.kind({
 				};
 
 				this.trace("setup dead designer timer");
-				var timer = setTimeout(mopUp.bind(this.designer), 5000);
+				var timer = setTimeout(mopUp.bind(this.designer), 30000);
 
 				var myNext = function () {
 					this.trace("Clearing dead designer timer");
