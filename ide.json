@@ -79,6 +79,42 @@
 			"XproxyUrl": "http://web-proxy.corp.hp.com:8080",
 			"sources": [
 				{
+					"id": "bootplate-moonstone-2.4.0",
+					"isDefault": true,
+					"type": "template",
+					"files": [
+						{
+							"url": "http://enyojs.com/archive/bootplate-moonstone-2.4.0.zip",
+							"prefixToRemove": "bootplate-moonstone",
+							"excluded": [
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
+      						]
+						}
+  					],
+					"description": "Enyo bootplate moonstone 2.4.0"
+				},
+				{
+					"id": "bootplate-2.4.0",
+					"isDefault": true,
+					"type": "template",
+					"files": [
+						{
+							"url": "http://enyojs.com/archive/bootplate-2.4.0.zip",
+							"prefixToRemove": "bootplate",
+							"excluded": [
+								"bootplate/api/",
+								"bootplate/build/",
+								"bootplate/deploy/",
+								"bootplate/enyo/tools/"
+      						]
+						}
+  					],
+					"description": "Enyo bootplate 2.4.0"
+				},
+				{
 					"id": "bootplate-2.3.0-pre.12",
 					"isDefault": true,
 					"type": "template",
