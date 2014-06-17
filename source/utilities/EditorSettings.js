@@ -65,7 +65,9 @@ enyo.kind({
 								{content: "eclipse"},
 								{content: "github"},
 								{content: "idle_fingers"},
+								{content: "katzenmilch"},
 								{content: "kr_theme"},
+								{content: "kuroir"},
 								{content: "merbivore"},
 								{content: "merbivore_soft"},
 								{content: "mono_industrial"},
@@ -73,6 +75,7 @@ enyo.kind({
 								{content: "pastel_on_dark"},
 								{content: "solarized_dark"},
 								{content: "solarized_light"},
+								{content: "terminal"},
 								{content: "textmate"},
 								{content: "tomorrow"},
 								{content: "tomorrow_night"},
@@ -120,7 +123,7 @@ enyo.kind({
 				]}
 			]},
 			{tag: "p", classes:"break"},
-		
+
 			{kind:"FittableRows", name: "functionKeys", components: [
 				{kind: "Control", name:"osMessage", classes:"ares-row", content: ilibUtilities("Programmable buttons Ctrl-SHIFT F1 to F12")},
 				{kind: "onyx.MenuDecorator", name:"program_buttons", classes:"ares-row", components: [
@@ -168,7 +171,7 @@ enyo.kind({
 				]}
 			]}
 		]},
-		
+
 		{name: "settingsToolbar", kind: "onyx.Toolbar", classes:"bottom-toolbar", components: [
 			{name: "close", kind: "onyx.Button", content: ilibUtilities("Cancel"), ontap: "cancelSettings"},
 			{name: "restoreDefault", kind: "onyx.Button",  content: ilibUtilities("Restore defaults"), ontap: "restoreDefaults"},
@@ -178,7 +181,7 @@ enyo.kind({
 	/**
 	 * @private
 	 */
-	
+
 	create: function() {
 		ares.setupTraceLogger(this);
 		this.inherited(arguments);
@@ -241,7 +244,7 @@ enyo.kind({
 					});
 				}else{
 					self.settings = enyo.json.parse(enyo.json.stringify(self.defaultsSettings));
-				}	
+				}
 			} catch(e) {
 				Ares.LocalStorage.remove(self.SETTINGS_STORAGE_KEY);
 			}
@@ -254,7 +257,7 @@ enyo.kind({
 		this.previewSettings = enyo.json.parse(enyo.json.stringify(this.settings));
 		this.doApplySettings();
 	},
-	
+
 	getSettingFromLS: function(){
 		this.getValuesFromLocalStorage();
 		return this.settings;
@@ -308,18 +311,18 @@ enyo.kind({
 		this.previewSettings.fontsize = inEvent.selected.content;
 		this.doChangeSettings();
 
-	},	
-	
+	},
+
 	rightPaneChanged: function(inSender, inEvent){
 		this.previewSettings.rightpane = inEvent.value;
-		this.doChangeRightPane();	
+		this.doChangeRightPane();
 	},
 
 	inputChanged: function(inSender, inEvent) {
-		var key = this.key;	
+		var key = this.key;
 		if (/^F\d+/.test(key)) {
 			this.previewSettings.keys[key] = this.$.textArea.value;
-		}	
+		}
 		this.closeModalPopup();
 	},
 
@@ -356,11 +359,11 @@ enyo.kind({
 		this.$[this.key].addClass("active");
 		this.disableKeys(true);
 		this.$.modalPopup.show();
-		this.draggable = false;	
+		this.draggable = false;
 	},
 
 	saveSettings: function() {
-		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls 
+		Ares.LocalStorage.set(this.SETTINGS_STORAGE_KEY, enyo.json.stringify(this.previewSettings)); //push to ls
 		this.initUI(this.previewSettings);
 		this.doCloseSettings();
 	},
@@ -384,7 +387,7 @@ enyo.kind({
 		this.initUI(this.defaultsSettings);
 		this.doChangeSettings();
 	},
-	
+
 	heraChanged: function(inSender, inEvent){
 		this.log("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.hera = inEvent.value;
@@ -396,7 +399,7 @@ enyo.kind({
 		this.previewSettings.autoTrace = inEvent.value;
 		this.$.autoTraceInputBox.setShowing(this.previewSettings.autoTrace);
 	},
-	
+
 	atraceline: function(inSender, inEvent){
 		this.trace("sender:", inSender, ", event:", inEvent);
 		this.previewSettings.autoTraceLine = inSender.value;
