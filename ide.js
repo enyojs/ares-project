@@ -592,6 +592,7 @@ function onExit() {
 		subProcesses = [];
 		log.info('onExit()', 'Exiting...');
 	}
+	process.exit(0);
 }
 
 ide.res.services.filter(function(service){
