@@ -14,7 +14,7 @@
 		"url" : "http://github.com/enyojs/ares-project.git"
 	},
 	"engines": {
-		"node" : "~0.10.6",
+		"node" : ">=0.10.6",
 		"npm": ">=1.2.11"
 	},
 	"engineStrict": true,
