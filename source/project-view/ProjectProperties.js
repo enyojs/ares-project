@@ -709,7 +709,7 @@ enyo.kind({
 		{kind: "onyx.InputDecorator", components: [
 			{kind: "Input", name: "pathInputValue", disabled: true}
 		]},
-		{kind: "onyx.IconButton", name:"pathInputButton", src: "$project-view/assets/images/file-32x32.png", ontap: "pathInputTap"}
+		{kind: "onyx.IconButton", name:"pathInputButton", src: "$assets/project-view/images/file-32x32.png", ontap: "pathInputTap"}
 	],
 	debug: false,
 
@@ -748,9 +748,9 @@ enyo.kind({
 	/** @private */
 	statusChanged: function () {
 		if (this.status) {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file-32x32.png");
+			this.$.pathInputButton.setSrc("$assets/project-view/images/file-32x32.png");
 		} else {
-			this.$.pathInputButton.setSrc("$project-view/assets/images/file_broken-32x32.png");
+			this.$.pathInputButton.setSrc("$assets/project-view/images/file_broken-32x32.png");
 		}
 	},
 	/** @private */
